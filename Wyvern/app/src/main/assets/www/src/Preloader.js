@@ -9,7 +9,6 @@ Wyvern.Preloader.prototype = {
 		this.load.image('screen-mainmenu', 'img/screen-mainmenu.png');
 		this.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
 		this.load.image('sprite', 'img/hi.png');
-		
 
 		this.load.spritesheet('button-start', 'img/button-start.png', 146, 51);
 	},
