@@ -1,0 +1,10 @@
+Wyvern/*
+!Wyvern/app
+Wyvern/app/*
+!Wyvern/app/src/
+Wyvern/app/src/*
+!Wyvern/app/src/main/
+Wyvern/app/src/main/*
+!Wyvern/app/src/main/assets/
+Wyvern/app/src/main/assets/*
+!Wyvern/app/src/main/assets/www
