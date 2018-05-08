@@ -1,9 +1,10 @@
-Wyvern.Game = function(game) {};
-Wyvern.Game.prototype = {
+var Game = 
+{
 	create: function() {
 		
 		//Setup gameplay numbers here
 		shootRateMultiplier = 1;
+		baseShotSpeed = -200;
 		shotSpeedMultiplier = 1;
 		shotSpread = 1;
 		iFrames = 0.5;
@@ -15,9 +16,9 @@ Wyvern.Game.prototype = {
 		//gameplay-related numbers end
 
 		//background
-		this.add.sprite(0, 0, 'screen-bg');
+		game.add.sprite(0, 0, 'screen-bg');
 		//makes bullets
-	 	bullets = this.game.add.group();
+	 	bullets = game.add.group();
 	    bullets.enableBody = true;
 	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
@@ -29,22 +30,22 @@ Wyvern.Game.prototype = {
 	        b.exists = false;
 	        b.visible = false;
 	        b.checkWorldBounds = true;
-	        b.events.onOutOfBounds.add(this.resetFunct, this);
+	        b.events.onOutOfBounds.add(resetFunct, this);
 	    }
 
 		//player
-		sprite = this.add.sprite(this.game.world.centerX, this.game.world.centerY*1.8, 'sprite');
+		sprite = game.add.sprite(game.world.centerX, game.world.centerY*1.8, 'sprite');
 		sprite.anchor.setTo(0.5, 0.5);
 		sprite.inputEnabled = true;
 		sprite.input.enableDrag(true);
-		this.game.physics.enable(sprite, Phaser.Physics.ARCADE);
+		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 		sprite.body.collideWorldBounds = true;
 	},
 	update: function() {
 		this.fireBullet();
 	},
 	fireBullet: function() {
-    	if (this.game.time.now > bulletTime) {
+    	if (game.time.now > bulletTime) {
     		shootDelay = 150 / shootRateMultiplier;
             for (var i = 0; i < shotSpread; i++) {
                 var bullet = bullets.getFirstExists(false);
@@ -54,15 +55,15 @@ Wyvern.Game.prototype = {
                     //decide how many bullets to shoot on each side
                     var k = Math.floor(shotSpread/2); 
                     var angle = k*spreadAngle - i*spreadAngle;
-                    this.game.physics.arcade.velocityFromAngle(angle-90, 300+40*shotSpread, bullet.body.velocity);
-                    bullet.body.velocity.y = -800 * shotSpeedMultiplier;
+                    game.physics.arcade.velocityFromAngle(angle-90, 10+40*shotSpread, bullet.body.velocity);
+                    bullet.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;
                 }
             }
-        	bulletTime = this.game.time.now + shootDelay;
+        	bulletTime = game.time.now + shootDelay;
         }
-	},
-	resetFunct: function(object){
-	//console.log(object.name+" just reset");
-	object.kill();
-	},
+	}
 };
+function resetFunct(object){
+//console.log(object.name+" just reset");
+object.kill();
+}

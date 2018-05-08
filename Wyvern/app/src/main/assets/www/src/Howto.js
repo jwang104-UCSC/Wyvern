@@ -1,10 +1,6 @@
-Wyvern.Howto = function(game) {
-};
-Wyvern.Howto.prototype = {
-	create: function() {
-		this.buttonContinue = this.add.button(0, 0, 'screen-howtoplay', this.startGame, this);
-	},
-	startGame: function() {
-		this.game.state.start('Game');
+var Howto = 
+{
+	create: function(){
+		buttonContinue = game.add.button(0, 0, 'screen-howtoplay', function(){game.state.start('Game')}, this);
 	}
-};
+}
