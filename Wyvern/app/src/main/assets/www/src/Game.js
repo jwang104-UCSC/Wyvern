@@ -15,7 +15,7 @@ var Game =
 		spawnTime = 0;
 		bulletTime = 0;
 		firingTime = 0;
-		canShoot = true;
+		canShoot = false;
 		hurtTime = 0;
 		//gameplay-related vars end
 
@@ -45,6 +45,26 @@ var Game =
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 		sprite.body.collideWorldBounds = true;
 
+		//makes enemies
+		enemies = game.add.group();
+		enemies.enableBody = true;
+		enemies.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    for (var i = 0; i < 40; i++)
+	    { 
+	        var e = enemies.create(0, 0, 'enemy');
+	        e.name = 'enemy' + i;
+    		//e.scale.setTo(0.2,0.2);
+			e.anchor.setTo(0.5, 0.5);
+	        e.exists = false;
+	        e.visible = false;
+	    }
+
+		//make a bar on the bottom of the screen to despawn offscreen enemies
+		screenBottomBar = game.add.sprite(0, game.world.height+25, "preloaderBar");
+		screenBottomBar.width = 3*game.world.width;
+		game.physics.enable(screenBottomBar, Phaser.Physics.ARCADE);
+
 		//These coord offsets are probably all wrong once we get real sprites
 		//UI
 
@@ -64,9 +84,33 @@ var Game =
 	    shootToggle.tint = 0xff0000;
 	},
 	update: function() {
+		if (game.time.now > spawnTime) this.makeEnemy();
+
 		scoreText.text = scoreString + score;
 		lifeCounter.text = "X " + lives;
 		this.fireBullet();
+
+	    //collision tests//function(){console.log("wtf");}
+	    game.physics.arcade.overlap(screenBottomBar, enemies,this.enemyOffScreen, null);
+	},
+	makeEnemy: function() {
+		var x = game.rnd.integerInRange(0, game.world.width);
+		var xspeed = game.rnd.integerInRange(-100, 100);
+		var yspeed = game.rnd.integerInRange(150, 300);
+		this.spawnEnemy(x, -10, xspeed, yspeed);
+	},
+	spawnEnemy: function(x, y, xspeed, yspeed) {
+        enemy = enemies.getFirstExists(false);
+        if (enemy)
+        {
+            enemy.reset(x, y);
+            enemy.body.velocity.x = xspeed;
+            enemy.body.velocity.y = yspeed;
+            spawnTime = game.time.now +200;
+        }
+	},
+	enemyOffScreen: function(bar, enemy){
+		resetFunct(enemy);
 	},
 	pauseFunct: function() {
 		console.log("game.paused = " + !game.paused);
@@ -99,6 +143,6 @@ var Game =
 	}
 };
 function resetFunct(object){
-//console.log(object.name+" just reset");
+console.log(object.name+" just reset");
 object.kill();
 }

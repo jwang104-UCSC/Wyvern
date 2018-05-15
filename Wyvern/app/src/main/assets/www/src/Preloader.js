@@ -11,6 +11,7 @@ var Preloader = {
 		game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
 
 		game.load.image('sprite', 'img/hi.png');
+		game.load.image('enemy', 'img/no.png');
 		game.load.image('bullet', 'img/bullet.png');
 
 		game.load.image('pause', 'img/pause.png');
