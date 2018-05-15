@@ -2,7 +2,7 @@ var Game =
 {
 	create: function() {
 		
-		//Setup gameplay numbers here
+		//Setup gameplay variables here
 		shootRateMultiplier = 1;
 		baseShotSpeed = -200;
 		shotSpeedMultiplier = 1;
@@ -15,10 +15,9 @@ var Game =
 		spawnTime = 0;
 		bulletTime = 0;
 		firingTime = 0;
+		canShoot = true;
 		hurtTime = 0;
-		//gameplay-related numbers end
-
-
+		//gameplay-related vars end
 
 		//background
 		game.add.sprite(0, 0, 'screen-bg');
@@ -48,19 +47,39 @@ var Game =
 
 		//These coord offsets are probably all wrong once we get real sprites
 		//UI
+
 		scoreString = 'Score: ';
 		scoreText = game.add.text(5,5, scoreString + score, {font: '16px Arial', fill:'#fff'});
 		//lives
 	    lifeCounter = game.add.text(sprite.width , game.world.height - sprite.height+11, 'X ' + lives, { font: '16px Arial', fill: '#fff'});
 		lifeCount = game.add.sprite(5, game.world.height - sprite.height+9, 'sprite');
 	    lifeCount.scale.setTo(0.6,0.6);
+	    //pause button
+	    pauseButton = game.add.button(game.world.width-25, 5, 'pause', this.pauseFunct);
+	    pauseButton.scale.setTo(0.6,0.6);
+	    //shooting toggle
+	    shootToggle = game.add.button(game.world.width-50, 5, 'pause', 
+	    	function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
+	    shootToggle.scale.setTo(0.6,0.6);
+	    shootToggle.tint = 0xff0000;
 	},
 	update: function() {
 		scoreText.text = scoreString + score;
 		lifeCounter.text = "X " + lives;
 		this.fireBullet();
 	},
+	pauseFunct: function() {
+		console.log("game.paused = " + !game.paused);
+		if(game.paused){
+			sprite.inputEnabled = true;
+			game.paused = false;
+			return;
+		}
+		sprite.inputEnabled = false;
+		game.paused = true;
+	},
 	fireBullet: function() {
+		if (!canShoot) return;
     	if (game.time.now > bulletTime) {
     		shootDelay = 150 / shootRateMultiplier;
             for (var i = 0; i < shotSpread; i++) {
