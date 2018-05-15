@@ -7,13 +7,18 @@ var Game =
 		baseShotSpeed = -200;
 		shotSpeedMultiplier = 1;
 		shotSpread = 1;
+
 		iFrames = 0.5;
 		lives =5;
+		score = 0;
+
 		spawnTime = 0;
 		bulletTime = 0;
 		firingTime = 0;
 		hurtTime = 0;
 		//gameplay-related numbers end
+
+
 
 		//background
 		game.add.sprite(0, 0, 'screen-bg');
@@ -40,8 +45,19 @@ var Game =
 		sprite.input.enableDrag(true);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 		sprite.body.collideWorldBounds = true;
+
+		//These coord offsets are probably all wrong once we get real sprites
+		//UI
+		scoreString = 'Score: ';
+		scoreText = game.add.text(5,5, scoreString + score, {font: '16px Arial', fill:'#fff'});
+		//lives
+	    lifeCounter = game.add.text(sprite.width , game.world.height - sprite.height+11, 'X ' + lives, { font: '16px Arial', fill: '#fff'});
+		lifeCount = game.add.sprite(5, game.world.height - sprite.height+9, 'sprite');
+	    lifeCount.scale.setTo(0.6,0.6);
 	},
 	update: function() {
+		scoreText.text = scoreString + score;
+		lifeCounter.text = "X " + lives;
 		this.fireBullet();
 	},
 	fireBullet: function() {

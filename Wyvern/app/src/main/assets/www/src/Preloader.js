@@ -15,7 +15,8 @@ var Preloader = {
 		game.load.spritesheet('button-start', 'img/button-start.png', 146, 51);
 	},
 	create: function()
-	{
-		game.state.start("MainMenu");
+	{	
+		//loads right into the game because I'm tired of clicking the menu away
+		game.state.start("Game");
 	}
 }
