@@ -20,7 +20,7 @@ var Game =
 		//gameplay-related vars end
 
 		//background
-		back = game.add.tileSprite(0, 0, 1080, 1920,'starfield');
+		back = game.add.tileSprite(0, 0, 1080, 1920,'redsky');
 		//makes bullets
 	 	bullets = game.add.group();
 	    bullets.enableBody = true;
@@ -28,7 +28,8 @@ var Game =
 
 	    for (var i = 0; i < 1000; i++)
 	    { 
-	        var b = bullets.create(0, 0, 'bullet');
+	        var b = bullets.create(0, 0, 'fireball');
+	        b.scale.setTo(0.01);
 	        b.name = 'bullet' + i;
 	        b.anchor.setTo(0.5,0.5);
 	        b.exists = false;
@@ -38,7 +39,8 @@ var Game =
 	    }
 
 		//player
-		sprite = game.add.sprite(game.world.centerX, game.world.centerY*1.8, 'sprite');
+		sprite = game.add.sprite(game.world.centerX, game.world.centerY*1.8, 'dragon');
+		sprite.scale.setTo(0.36);
 		sprite.anchor.setTo(0.5, 0.5);
 		sprite.inputEnabled = true;
 		sprite.input.enableDrag(true);
@@ -50,9 +52,10 @@ var Game =
 		enemies.enableBody = true;
 		enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 40; i++)
+	    for (var i = 0; i < 10; i++)
 	    { 
 	        var e = enemies.create(0, 0, 'enemy');
+	        e.scale.setTo(0.04);
 	        e.name = 'enemy' + i;
     		//e.scale.setTo(0.2,0.2);
 			e.anchor.setTo(0.5, 0.5);
@@ -129,11 +132,11 @@ var Game =
 	fireBullet: function() {
 		if (!canShoot) return;
     	if (game.time.now > bulletTime) {
-    		shootDelay = 150 / shootRateMultiplier;
+    		shootDelay = 200 / shootRateMultiplier;
             for (var i = 0; i < shotSpread; i++) {
                 var bullet = bullets.getFirstExists(false);
                 if (bullet) {
-                    bullet.reset(sprite.x, sprite.y);
+                    bullet.reset(sprite.x, sprite.y - 17);
                     var spreadAngle = 90/shotSpread;
                     //decide how many bullets to shoot on each side
                     var k = Math.floor(shotSpread/2); 
