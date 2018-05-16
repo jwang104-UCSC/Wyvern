@@ -20,7 +20,7 @@ var Game =
 		//gameplay-related vars end
 
 		//background
-		game.add.sprite(0, 0, 'screen-bg');
+		back = game.add.tileSprite(0, 0, 1080, 1920,'starfield');
 		//makes bullets
 	 	bullets = game.add.group();
 	    bullets.enableBody = true;
@@ -84,6 +84,7 @@ var Game =
 	    shootToggle.tint = 0xff0000;
 	},
 	update: function() {
+	    back.tilePosition.y += 2;
 		if (game.time.now > spawnTime) this.makeEnemy();
 
 		scoreText.text = scoreString + score;
@@ -115,12 +116,15 @@ var Game =
 	pauseFunct: function() {
 		console.log("game.paused = " + !game.paused);
 		if(game.paused){
+		    menu.destroy();
 			sprite.inputEnabled = true;
 			game.paused = false;
 			return;
 		}
 		sprite.inputEnabled = false;
 		game.paused = true;
+		menu = game.add.sprite(game.world.width/3, game.world.height/2, 'logo');
+		menu.setAnchor(0.5, 0.5);
 	},
 	fireBullet: function() {
 		if (!canShoot) return;
