@@ -21,6 +21,7 @@ var Preloader = {
 
 		game.load.image('pause', 'img/pause.png');
 		game.load.spritesheet('button-start', 'img/button-start.png', 146, 51);
+		game.load.spritesheet('button', 'img/flixel-button.png', 80, 20);
 	},
 	create: function()
 	{

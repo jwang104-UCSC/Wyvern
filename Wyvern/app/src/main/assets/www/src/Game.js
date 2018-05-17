@@ -40,7 +40,7 @@ var Game =
 
 		//player
 		sprite = game.add.sprite(game.world.centerX, game.world.centerY*1.8, 'dragon');
-		sprite.scale.setTo(0.36);
+		sprite.scale.setTo(0.35);
 		sprite.anchor.setTo(0.5, 0.5);
 		sprite.inputEnabled = true;
 		sprite.input.enableDrag(true);
@@ -75,8 +75,9 @@ var Game =
 		scoreText = game.add.text(5,5, scoreString + score, {font: '16px Arial', fill:'#fff'});
 		//lives
 	    lifeCounter = game.add.text(sprite.width , game.world.height - sprite.height+11, 'X ' + lives, { font: '16px Arial', fill: '#fff'});
-		lifeCount = game.add.sprite(5, game.world.height - sprite.height+9, 'sprite');
-	    lifeCount.scale.setTo(0.6,0.6);
+		lifeCount = game.add.sprite(5, game.world.height - sprite.height+9, 'dragon');
+	    lifeCount.scale.setTo(0.2);
+	    //lifeCount.anchor.setTo(0.5,0.5);
 	    //pause button
 	    pauseButton = game.add.button(game.world.width-25, 5, 'pause', this.pauseFunct);
 	    pauseButton.scale.setTo(0.6,0.6);
