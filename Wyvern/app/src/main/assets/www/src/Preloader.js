@@ -22,7 +22,7 @@ var Preloader = {
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 
 		game.load.image('pause', 'img/pause.png');
-		game.load.spritesheet('button-start', 'img/button-start.png', 146, 51);
+		//game.load.spritesheet('button-start', 'img/button-start.png', 146, 51);
 		game.load.spritesheet('button', 'img/flixel-button.png', 80, 20);
 	},
 	create: function()
