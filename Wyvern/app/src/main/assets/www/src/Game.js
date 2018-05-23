@@ -40,7 +40,7 @@ var Game =
 
 		//player
 		sprite = game.add.sprite(game.world.centerX, game.world.centerY*1.8, 'dragon');
-		sprite.scale.setTo(0.36);
+		sprite.scale.setTo(0.35);
 		sprite.anchor.setTo(0.5, 0.5);
 		sprite.inputEnabled = true;
 		sprite.input.enableDrag(true);
@@ -52,20 +52,21 @@ var Game =
 		enemies.enableBody = true;
 		enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 10; i++)
+	    for (var i = 0; i < 100; i++)
 	    { 
-	        var e = enemies.create(0, 0, 'enemy');
-	        e.scale.setTo(0.04);
+	        var e = enemies.create(0, 0, 'eyes');
+	        //e.scale.setTo(0.04);
 	        e.name = 'enemy' + i;
-    		//e.scale.setTo(0.2,0.2);
 			e.anchor.setTo(0.5, 0.5);
+			e.animations.add("fly", [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], 60, true);
+			e.play('fly');
 	        e.exists = false;
 	        e.visible = false;
 	    }
 
 		//make a bar on the bottom of the screen to despawn offscreen enemies
 		screenBottomBar = game.add.sprite(0, game.world.height+25, "preloaderBar");
-		screenBottomBar.width = 3*game.world.width;
+		screenBottomBar.width = 20*game.world.width;
 		game.physics.enable(screenBottomBar, Phaser.Physics.ARCADE);
 
 		//These coord offsets are probably all wrong once we get real sprites
@@ -75,8 +76,9 @@ var Game =
 		scoreText = game.add.text(5,5, scoreString + score, {font: '16px Arial', fill:'#fff'});
 		//lives
 	    lifeCounter = game.add.text(sprite.width , game.world.height - sprite.height+11, 'X ' + lives, { font: '16px Arial', fill: '#fff'});
-		lifeCount = game.add.sprite(5, game.world.height - sprite.height+9, 'sprite');
-	    lifeCount.scale.setTo(0.6,0.6);
+		lifeCount = game.add.sprite(5, game.world.height - sprite.height+9, 'dragon');
+	    lifeCount.scale.setTo(0.2);
+	    //lifeCount.anchor.setTo(0.5,0.5);
 	    //pause button
 	    pauseButton = game.add.button(game.world.width-25, 5, 'pause', this.pauseFunct);
 	    pauseButton.scale.setTo(0.6,0.6);
@@ -85,6 +87,9 @@ var Game =
 	    	function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
 	    shootToggle.scale.setTo(0.6,0.6);
 	    shootToggle.tint = 0xff0000;
+
+	    //uncomment this to test an enemy!
+	    //this.spawnEnemy(game.world.width*0.5, 150, 0, 0);
 	},
 	update: function() {
 	    back.tilePosition.y += 2;
@@ -94,13 +99,13 @@ var Game =
 		lifeCounter.text = "X " + lives;
 		this.fireBullet();
 
-	    //collision tests//function(){console.log("wtf");}
+	    //collision tests
 	    game.physics.arcade.overlap(screenBottomBar, enemies,this.enemyOffScreen, null);
 	},
 	makeEnemy: function() {
 		var x = game.rnd.integerInRange(0, game.world.width);
-		var xspeed = game.rnd.integerInRange(-100, 100);
-		var yspeed = game.rnd.integerInRange(150, 300);
+		var xspeed = game.rnd.integerInRange(-40, 40);
+		var yspeed = game.rnd.integerInRange(75, 150);
 		this.spawnEnemy(x, -10, xspeed, yspeed);
 	},
 	spawnEnemy: function(x, y, xspeed, yspeed) {
@@ -119,15 +124,12 @@ var Game =
 	pauseFunct: function() {
 		console.log("game.paused = " + !game.paused);
 		if(game.paused){
-		    menu.destroy();
 			sprite.inputEnabled = true;
 			game.paused = false;
 			return;
 		}
 		sprite.inputEnabled = false;
 		game.paused = true;
-		menu = game.add.sprite(game.world.width/3, game.world.height/2, 'logo');
-		menu.setAnchor(0.5, 0.5);
 	},
 	fireBullet: function() {
 		if (!canShoot) return;

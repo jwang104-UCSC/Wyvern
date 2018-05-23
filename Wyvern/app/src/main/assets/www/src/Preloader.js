@@ -18,13 +18,17 @@ var Preloader = {
 		game.load.image('bullet', 'img/bullet.png');
 		game.load.image('dragon', 'img/dragon.png');
 		game.load.image('fireball', 'img/fireball.png');
+		game.load.spritesheet('eyes', 'img/eyes35x32.png', 35, 32, 16);
+		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 
 		game.load.image('pause', 'img/pause.png');
 		game.load.spritesheet('button-start', 'img/button-start.png', 146, 51);
+		game.load.spritesheet('button', 'img/flixel-button.png', 80, 20);
 	},
 	create: function()
 	{
 		//loads right into the game because I'm tired of clicking the menu away
+		game.state.start("Game");
 		game.state.start("MainMenu");
 	}
 }
