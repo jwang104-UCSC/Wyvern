@@ -158,7 +158,7 @@ var Game =
 		//this too
 		//this.pauseFunct("Paused!", 50);
 		resumeBtn = createButton("Resume",15,game.world.width*0.5, game.world.height*0.6,
-						 80, 30, this.pauseMenu);
+						 80, 30, Game.pauseMenu);
 		restartBtn = createButton("Restart",15,game.world.width*0.5, game.world.height*0.7,
 						 80, 30, function(){game.state.restart(); game.paused = false;});
 		menuBtn = createButton("Menu",15,game.world.width*0.5, game.world.height*0.8,
