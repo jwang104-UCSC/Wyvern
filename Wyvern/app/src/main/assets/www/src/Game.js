@@ -15,7 +15,7 @@ var Game =
 		spawnTime = 0;
 		bulletTime = 0;
 		firingTime = 0;
-		canShoot = false;
+		canShoot = true;
 		hurtTime = 0;
 		//gameplay-related vars end
 
@@ -38,14 +38,7 @@ var Game =
 	        b.events.onOutOfBounds.add(resetFunct, this);
 	    }
 
-		//player
-		sprite = game.add.sprite(game.world.centerX, game.world.centerY*1.8, 'dragon');
-		sprite.scale.setTo(0.35);
-		sprite.anchor.setTo(0.5, 0.5);
-		sprite.inputEnabled = true;
-		sprite.input.enableDrag(true);
-		game.physics.enable(sprite, Phaser.Physics.ARCADE);
-		sprite.body.collideWorldBounds = true;
+
 
 		//makes enemies
 		enemies = game.add.group();
@@ -55,10 +48,10 @@ var Game =
 	    for (var i = 0; i < 100; i++)
 	    { 
 	        var e = enemies.create(0, 0, 'eyes');
-	        //e.scale.setTo(0.04);
+	        //e.scale.setTo(0.9);
 	        e.name = 'enemy' + i;
 			e.anchor.setTo(0.5, 0.5);
-			e.animations.add("fly", [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], 60, true);
+			e.animations.add("fly", [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15], 20, true);
 			e.play('fly');
 	        e.exists = false;
 	        e.visible = false;
@@ -68,6 +61,15 @@ var Game =
 		screenBottomBar = game.add.sprite(0, game.world.height+25, "preloaderBar");
 		screenBottomBar.width = 20*game.world.width;
 		game.physics.enable(screenBottomBar, Phaser.Physics.ARCADE);
+
+		//player
+		sprite = game.add.sprite(game.world.centerX, game.world.centerY*1.8, 'dragon');
+		sprite.scale.setTo(0.35);
+		sprite.anchor.setTo(0.5, 0.5);
+		sprite.inputEnabled = true;
+		sprite.input.enableDrag(true);
+		game.physics.enable(sprite, Phaser.Physics.ARCADE);
+		sprite.body.collideWorldBounds = true;
 
 		//These coord offsets are probably all wrong once we get real sprites
 		//UI
@@ -80,10 +82,10 @@ var Game =
 	    lifeCount.scale.setTo(0.2);
 	    //lifeCount.anchor.setTo(0.5,0.5);
 	    //pause button
-	    pauseButton = game.add.button(game.world.width-25, 5, 'pause', this.pauseFunct);
+	    pauseButton = game.add.button(game.world.width-25, 5, 'pauseBtn', this.pauseMenu);
 	    pauseButton.scale.setTo(0.6,0.6);
 	    //shooting toggle
-	    shootToggle = game.add.button(game.world.width-50, 5, 'pause', 
+	    shootToggle = game.add.button(game.world.width-50, 5, 'pauseBtn', 
 	    	function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
 	    shootToggle.scale.setTo(0.6,0.6);
 	    shootToggle.tint = 0xff0000;
@@ -97,7 +99,7 @@ var Game =
 
 		scoreText.text = scoreString + score;
 		lifeCounter.text = "X " + lives;
-		this.fireBullet();
+		//this.fireBullet();
 
 	    //collision tests
 	    game.physics.arcade.overlap(screenBottomBar, enemies,this.enemyOffScreen, null);
@@ -121,16 +123,6 @@ var Game =
 	enemyOffScreen: function(bar, enemy){
 		resetFunct(enemy);
 	},
-	pauseFunct: function() {
-		console.log("game.paused = " + !game.paused);
-		if(game.paused){
-			sprite.inputEnabled = true;
-			game.paused = false;
-			return;
-		}
-		sprite.inputEnabled = false;
-		game.paused = true;
-	},
 	fireBullet: function() {
 		if (!canShoot) return;
     	if (game.time.now > bulletTime) {
@@ -149,9 +141,56 @@ var Game =
             }
         	bulletTime = game.time.now + shootDelay;
         }
+	},
+	//if paused, remove buttons and pause screen
+	pauseMenu: function(){
+		if(game.paused){
+			removeButton(resumeBtn)
+			removeButton(menuBtn)
+			removeButton(restartBtn)
+			Game.pauseFunct();
+			//for some reason this doesn't work
+			//this.pauseFunct();
+		}//if not paused, pause and make menu
+		else{
+		Game.pauseFunct("Paused!", 50);
+		//this too
+		//this.pauseFunct("Paused!", 50);
+		resumeBtn = createButton("Resume",15,game.world.width*0.5, game.world.height*0.6,
+						 80, 30, this.pauseMenu);
+		restartBtn = createButton("Restart",15,game.world.width*0.5, game.world.height*0.7,
+						 80, 30, function(){game.state.restart(); game.paused = false;});
+		menuBtn = createButton("Menu",15,game.world.width*0.5, game.world.height*0.8,
+						 80, 30, function(){game.state.start('MainMenu'); game.paused = false;});
+		}
+	},
+	//if paused, unpause and remove pause screen
+	pauseFunct: function(string, fontsize, x, y){
+		if(game.paused){
+			pauseScreen.kill();
+			sprite.inputEnabled = true;
+			pauseText.kill();
+			game.paused = false;
+		}//if not paused, pause and make menu
+		else{
+		console.log("paused: ", string);
+		sprite.inputEnabled = false;
+		game.paused = true;
+
+		if (x == undefined)textX = game.world.centerX;
+			else textX = x;
+		if (y == undefined)textY = game.world.centerY*0.5;
+			else textY = y;
+		// if (fontsize == undefined)size = 50;
+		// 	else size = fontsize;
+		pauseScreen = game.add.sprite(0, 0, 'pauseScreen');
+		pauseText = game.add.text(textX	,textY,
+			string,{font:50+"px Verdana", fill: "#FFF",align:"center"});
+		pauseText.anchor.setTo(0.5, 0.5);
+		}
 	}
 };
 function resetFunct(object){
-console.log(object.name+" just reset");
+//console.log(object.name+" just reset");
 object.kill();
 }
