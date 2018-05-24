@@ -99,7 +99,7 @@ var Game =
 
 		scoreText.text = scoreString + score;
 		lifeCounter.text = "X " + lives;
-		//this.fireBullet();
+		this.fireBullet();
 
 	    //collision tests
 	    game.physics.arcade.overlap(screenBottomBar, enemies,this.enemyOffScreen, null);
@@ -150,6 +150,7 @@ var Game =
 			removeButton(restartBtn)
 			Game.pauseFunct();
 			//for some reason this doesn't work
+			//"this.pauseFunct is not a function"
 			//this.pauseFunct();
 		}//if not paused, pause and make menu
 		else{
