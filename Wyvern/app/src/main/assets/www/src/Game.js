@@ -20,9 +20,10 @@ var Game =
 		iFrames = 1;
 		score = 0;
 
-		if(typeof lives === 'undefined') 
+		if(typeof lives === 'undefined'|| lives <= 0) 
 		{
-			lives = 1; //only 1 to die faster
+			//lives = 1; //only 1 to die faster
+			lives = 5; //set to 5 for testing
 		} 
 
 		spawnTime = 0;
@@ -94,11 +95,16 @@ var Game =
 		//player
 		sprite = game.add.sprite(game.world.centerX, game.world.centerY*1.8, 'dragon');
 		sprite.scale.setTo(0.35);
-		sprite.anchor.setTo(0.5, 0.5);
+		sprite.anchor.setTo(0.5, 0.8);
+		hitbox = game.add.sprite(0, -50, "bullet");
+		sprite.addChild(hitbox);
+		hitbox.anchor.setTo(0.5, 0.5);
+		//hitbox.scale.setTo(0.9);
 		sprite.inputEnabled = true;
 		sprite.input.enableDrag(true);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 		sprite.body.collideWorldBounds = true;
+		
 
 		//make explosions
 	    explosions = game.add.group();
@@ -149,7 +155,7 @@ var Game =
 	    //collision tests
 	    game.physics.arcade.overlap(screenEdge, enemies,this.enemyOffScreen);
 	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit);
-	    game.physics.arcade.overlap(sprite, enemies, this.enemyTouched);
+	    game.physics.arcade.overlap(hitbox, enemies, this.enemyTouched);
 	},
 
 	makeEnemy: function() 
@@ -278,8 +284,8 @@ var Game =
 		Game.pauseFunct("DEFEAT", 50);
 		retryButton = createButton("Retry", 15, game.world.width*0.5, game.world.height*0.7,
 						 80, 30, function(){game.state.restart(); game.paused = false;});
-		exitButton  = createButton("Return to Main Menu", 15, game.world.width*0.5, game.world.height*0.8,
-						 160, 30, function(){game.state.start('MainMenu'); game.paused = false;});
+		exitButton  = createButton("Main Menu", 15, game.world.width*0.5, game.world.height*0.8,
+						 80, 30, function(){game.state.start('MainMenu'); game.paused = false;});
 		//game.paused = true;
 		//lives = 5;
 	},
@@ -374,7 +380,7 @@ function textPopup(string, x, y){
     	l.body.velocity.y=-100;
     	l.body.gravity.y=200;
     	l.body.maxVelocity.y = 150;
-    	game.add.tween(l).to( { alpha: 0 }, 1500, Phaser.Easing.Linear.None, true, 0, 1000, true);
+    	game.add.tween(l).to( { alpha: 0 }, 1200, Phaser.Easing.Linear.None, true, 0, 1000, true);
     	l.name = string.charAt(i);
     	l.checkWorldBounds = true;
     	l.events.onOutOfBounds.add(resetFunct, this);
@@ -396,7 +402,7 @@ function numPopup(string, x, y){
     	n.body.velocity.y=-100;
     	n.body.gravity.y=200;
     	n.body.maxVelocity.y = 150;
-    	game.add.tween(n).to( { alpha: 0 }, 1500, Phaser.Easing.Linear.None, true, 0, 1000, true);
+    	game.add.tween(n).to( { alpha: 0 }, 1200, Phaser.Easing.Linear.None, true);
     	n.name = string.charAt(i);
     	n.checkWorldBounds = true;
     	n.events.onOutOfBounds.add(resetFunct, this);

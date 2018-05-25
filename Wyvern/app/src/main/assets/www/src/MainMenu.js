@@ -7,11 +7,11 @@ var MainMenu =
 		gameTitle.anchor.set(0.5,0);
 
 		//Create the title screen buttons
-		startButton    = createButton("Start Game", 15, game.world.width*0.5, game.world.height*0.5, 
+		startButton    = createButton("Start Game", 15, game.world.width*0.5, game.world.height*0.6, 
 								80, 30, function(){game.state.start('Howto')});
 		settingsButton = createButton("Settings", 15, game.world.width*0.5, game.world.height*0.7, 
 								80, 30, function(){game.state.start('Howto')});
-		shopButton     = createButton("Shop", 15, game.world.width*0.5, game.world.height*0.9, 
+		shopButton     = createButton("Shop", 15, game.world.width*0.5, game.world.height*0.8, 
 								80, 30, function(){game.state.start('Shop')});
 	}
 }
