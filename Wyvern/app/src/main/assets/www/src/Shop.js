@@ -15,12 +15,18 @@ var Shop =
 	livesPlus: function()
 	{
 		lives++;
-		game.state.start('Game');
+		update = game.add.text(game.world.centerX, game.world.centerY*0.5,
+						"Lives Increased!", {font:"px Verdana", fill:"#0", align:"center"});
+		game.time.events.add(1000, function(){game.add.tween(update).to({y: 0}, 1500, Phaser.Easing.Linear.None, true); 
+						game.add.tween(update).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);}, this);
 	},
 
 	spreadPlus: function()
 	{
 		shotSpread++;
-		game.state.start('Game');
+		update2 = game.add.text(game.world.centerX, game.world.centerY*0.5,
+						"Spread Increased!", {font:"px Verdana", fill:"#0", align:"center"});
+		game.time.events.add(1000, function(){game.add.tween(update2).to({y: 0}, 1500, Phaser.Easing.Linear.None, true); 
+						game.add.tween(update2).to({alpha: 0}, 1500, Phaser.Easing.Linear.None, true);}, this);
 	}
 }
