@@ -59,7 +59,7 @@ var Game =
 
 
 		//makes enemies
-		enemies = game.add.group();
+		//enemies = game.add.group();
 		eyes = game.add.group();
 	    meteors = game.add.group();
 
@@ -97,8 +97,8 @@ var Game =
 	        e.hp = enemyToughness-1;
 	        e.worth = 50;
 	    }
-	    enemies.add(eyes);
-	    enemies.add(meteors);
+	    // enemies.add(eyes);
+	    // enemies.add(meteors);
 
 		//make a barrier off the edges of screen to despawn offscreen enemies
 		screenEdge = game.add.group();
@@ -167,7 +167,7 @@ var Game =
 	    shootToggle.tint = 0xff0000;
 
 	    //uncomment this to test an enemy!
-	    this.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);
+	    //this.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);
 	    //explodeFunct(game.world.width*0.5, 150);
 	},
 
