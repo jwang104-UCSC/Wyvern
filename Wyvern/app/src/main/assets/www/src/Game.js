@@ -197,7 +197,6 @@ var Game =
 			    explodeFunct(sprite.body.x, sprite.body.y);
 			    lives--;
 			    hurtTime = game.time.now + iFrames*1000;
-			    //sprite.tint = 0x0099ff;
 			    blinkBool = true;
 			    for(i=1; i<=iFrames*10; i++){
 			    		game.time.events.add(100*i, this.spriteBlink);
@@ -210,7 +209,6 @@ var Game =
 		}
 	},
 	spriteBlink: function(){
-		//console.log("wtf");
 		if (!blinkBool) {
 			sprite.alpha = 1;
 			blinkBool = !blinkBool;
@@ -219,7 +217,6 @@ var Game =
 			sprite.alpha = 0;
 			blinkBool = !blinkBool;
 		}
-		//sprite.visible = !sprite.visible;
 	},
 	gameOver: function(){
 		console.log("lol you died\n have 5 more lives, try again");
