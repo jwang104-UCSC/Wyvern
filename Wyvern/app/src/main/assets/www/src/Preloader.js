@@ -21,6 +21,9 @@ var Preloader = {
 		game.load.image('fireball', 'img/fireball.png');
 		game.load.spritesheet('explode', 'img/explode.png', 128, 128);
 		game.load.spritesheet('eyes', 'img/eyes35x32.png', 35, 32, 16);
+		game.load.spritesheet('letters', 'img/letters-white.png', 9, 8, 26);
+		game.load.spritesheet('numbers', 'img/numbers-white.png', 9, 8, 12);
+		
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 
 		game.load.image('pauseBtn', 'img/pause.png');
