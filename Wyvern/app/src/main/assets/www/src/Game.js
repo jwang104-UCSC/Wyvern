@@ -150,7 +150,7 @@ var Game =
 		this.spawnEnemy(x, -10, xspeed, yspeed);
 	},
 
-	spawnEnemy: function(x, y, xspeed, yspeed) `
+	spawnEnemy: function(x, y, xspeed, yspeed)
 	{
         enemy = enemies.getFirstExists(false);
         if (enemy)
@@ -338,7 +338,7 @@ var Game =
 		pauseText.anchor.setTo(0.5, 0.5);
 		}
 	}
-};
+}
 
 function explodeFunct(x, y)
 {
