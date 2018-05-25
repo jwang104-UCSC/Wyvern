@@ -8,19 +8,23 @@ var Game =
 		shotSpeedMultiplier = 1;
 		shotSpread = 1;
 
-		iFrames = 0.5;
+		iFrames = 1;
 		lives =5;
 		score = 0;
 
 		spawnTime = 0;
 		bulletTime = 0;
 		firingTime = 0;
-		canShoot = true;
+		canShoot = false;
 		hurtTime = 0;
+
+		enemyToughness = 4;
+		enemiesKilled = 0;
 		//gameplay-related vars end
 
 		//background
-		back = game.add.tileSprite(0, 0, 1080, 1920,'redsky');
+		back = game.add.tileSprite(0, 0, 200, 1280,'redsky');
+		back.tint = 0x808080;
 		//makes bullets
 	 	bullets = game.add.group();
 	    bullets.enableBody = true;
@@ -45,7 +49,7 @@ var Game =
 		enemies.enableBody = true;
 		enemies.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 100; i++)
+	    for (var i = 0; i < 500; i++)
 	    { 
 	        var e = enemies.create(0, 0, 'eyes');
 	        //e.scale.setTo(0.9);
@@ -55,6 +59,7 @@ var Game =
 			e.play('fly');
 	        e.exists = false;
 	        e.visible = false;
+	        e.hp = enemyToughness;
 	    }
 
 		//make a bar on the bottom of the screen to despawn offscreen enemies
@@ -71,6 +76,15 @@ var Game =
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 		sprite.body.collideWorldBounds = true;
 
+		//make explosions
+	    explosions = game.add.group();
+	    explosions.createMultiple(200, 'explode');
+	    explosions.forEach(
+	    	function(boom){
+			//boom.anchor.setTo(0.3, 0.3);
+			boom.animations.add('explode');}
+		);
+
 		//These coord offsets are probably all wrong once we get real sprites
 		//UI
 
@@ -84,25 +98,32 @@ var Game =
 	    //pause button
 	    pauseButton = game.add.button(game.world.width-25, 5, 'pauseBtn', this.pauseMenu);
 	    pauseButton.scale.setTo(0.6,0.6);
-	    //shooting toggle
+	    //shooting toggle AKA debug button make it do whatever you want for testing
 	    shootToggle = game.add.button(game.world.width-50, 5, 'pauseBtn', 
-	    	function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
+	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
+	    	//function(){explodeFunct(game.world.width*0.5, 150);});
+	    	function(){sprite.alpha = 1;});
+	    	
 	    shootToggle.scale.setTo(0.6,0.6);
 	    shootToggle.tint = 0xff0000;
 
 	    //uncomment this to test an enemy!
 	    //this.spawnEnemy(game.world.width*0.5, 150, 0, 0);
+	    //explodeFunct(game.world.width*0.5, 150);
 	},
 	update: function() {
 	    back.tilePosition.y += 2;
 		if (game.time.now > spawnTime) this.makeEnemy();
-
-		scoreText.text = scoreString + score;
-		lifeCounter.text = "X " + lives;
 		this.fireBullet();
 
+		//updates the UI counters
+		scoreText.text = scoreString + score;
+		lifeCounter.text = "X " + lives;
+
 	    //collision tests
-	    game.physics.arcade.overlap(screenBottomBar, enemies,this.enemyOffScreen, null);
+	    game.physics.arcade.overlap(screenBottomBar, enemies,this.enemyOffScreen);
+	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit);
+	    game.physics.arcade.overlap(sprite, enemies, this.enemyTouched);
 	},
 	makeEnemy: function() {
 		var x = game.rnd.integerInRange(0, game.world.width);
@@ -117,10 +138,11 @@ var Game =
             enemy.reset(x, y);
             enemy.body.velocity.x = xspeed;
             enemy.body.velocity.y = yspeed;
-            spawnTime = game.time.now +200;
+            spawnTime = game.time.now +800;
         }
 	},
 	enemyOffScreen: function(bar, enemy){
+		enemy.hp = enemyToughness;
 		resetFunct(enemy);
 	},
 	fireBullet: function() {
@@ -142,6 +164,69 @@ var Game =
         	bulletTime = game.time.now + shootDelay;
         }
 	},
+	//collision stuff
+	bulletHit: function(shot, victim) {
+		//remove the shot sprite
+	    shot.kill();
+		score++;
+	    victim.hp--;
+	    victim.tint = 0xFF0000;
+	    //change tint back after delay in millisecond
+	    game.time.events.add(20, function(){victim.tint = 0xFFFFFF});
+	    //check if victim dies
+	    if(victim.hp<=0){
+	    victim.kill();
+	    enemiesKilled++;
+	    //reset hp
+	    victim.hp = enemyToughness;
+	    //Increase the score
+	    score += 100;
+	    if(enemiesKilled%10==0) lives++;
+	    //explode
+	    explodeFunct(victim.body.x, victim.body.y);
+		}
+	},
+	enemyTouched: function(player, enemy) {
+    	Game.killFunct();
+    	enemy.kill();
+	},
+	killFunct: function(){
+		if(game.time.now > hurtTime){
+		    if (lives>=0)
+		    {
+			    explodeFunct(sprite.body.x, sprite.body.y);
+			    lives--;
+			    hurtTime = game.time.now + iFrames*1000;
+			    //sprite.tint = 0x0099ff;
+			    blinkBool = true;
+			    for(i=1; i<=iFrames*10; i++){
+			    		game.time.events.add(100*i, this.spriteBlink);
+			    }
+		    }
+		    if (lives < 0){
+			    this.gameOver();
+			    //sprite.visible = false;
+		    }	
+		}
+	},
+	spriteBlink: function(){
+		//console.log("wtf");
+		if (!blinkBool) {
+			sprite.alpha = 1;
+			blinkBool = !blinkBool;
+		}
+		else if (blinkBool){
+			sprite.alpha = 0;
+			blinkBool = !blinkBool;
+		}
+		//sprite.visible = !sprite.visible;
+	},
+	gameOver: function(){
+		console.log("lol you died\n have 5 more lives, try again");
+		//game.paused = true;
+		lives = 5;
+	},
+	//pause menu stuff
 	//if paused, remove buttons and pause screen
 	pauseMenu: function(){
 		if(game.paused){
@@ -191,6 +276,13 @@ var Game =
 		}
 	}
 };
+function explodeFunct(x, y){
+	var explosion = explosions.getFirstExists(false);
+    explosion.reset(x, y);
+    explosion.scale.setTo(0.3);
+    explosion.alpha = 0.5;
+    explosion.play('explode', 30, false, true);
+}
 function resetFunct(object){
 //console.log(object.name+" just reset");
 object.kill();

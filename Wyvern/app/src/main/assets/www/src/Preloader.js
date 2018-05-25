@@ -10,14 +10,16 @@ var Preloader = {
 		game.load.image('screen-mainmenu', 'img/screen-mainmenu.png');
 		game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
 		game.load.image('starfield', 'img/starfield.png');
-		game.load.image('redsky', 'img/redsky.jpg');
+		//game.load.image('redsky', 'img/redsky.jpg');
+		game.load.image('redsky', 'img/redskyloop.png');
 		game.load.image('pauseScreen', 'img/pause-screen.png');
 
-		game.load.image('sprite', 'img/hi.png');
-		game.load.image('enemy', 'img/bat.png');
+		//game.load.image('sprite', 'img/hi.png');
+		//game.load.image('enemy', 'img/bat.png');
 		game.load.image('bullet', 'img/bullet.png');
 		game.load.image('dragon', 'img/dragon.png');
 		game.load.image('fireball', 'img/fireball.png');
+		game.load.spritesheet('explode', 'img/explode.png', 128, 128);
 		game.load.spritesheet('eyes', 'img/eyes35x32.png', 35, 32, 16);
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 
