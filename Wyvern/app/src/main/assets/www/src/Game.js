@@ -150,7 +150,7 @@ var Game =
 		this.spawnEnemy(x, -10, xspeed, yspeed);
 	},
 
-	spawnEnemy: function(x, y, xspeed, yspeed) 
+	spawnEnemy: function(x, y, xspeed, yspeed)
 	{
         enemy = enemies.getFirstExists(false);
         if (enemy)
@@ -161,7 +161,7 @@ var Game =
             spawnTime = game.time.now + 800;
         }
 	},
-
+	
 	enemyOffScreen: function(bar, enemy)
 	{
 		enemy.hp = enemyToughness;
@@ -234,7 +234,6 @@ var Game =
 			    explodeFunct(sprite.body.x, sprite.body.y);
 			    lives--;
 			    hurtTime = game.time.now + iFrames*1000;
-			    //sprite.tint = 0x0099ff;
 			    blinkBool = true;
 			    for(i = 1; i <= iFrames*10; i++)
 			    {
@@ -248,10 +247,8 @@ var Game =
 		    }	
 		}
 	},
-
 	spriteBlink: function()
 	{
-		//console.log("wtf");
 		if (!blinkBool) 
 		{
 			sprite.alpha = 1;
@@ -262,7 +259,6 @@ var Game =
 			sprite.alpha = 0;
 			blinkBool = !blinkBool;
 		}
-		//sprite.visible = !sprite.visible;
 	},
 
 	gameOver: function()
@@ -342,7 +338,7 @@ var Game =
 		pauseText.anchor.setTo(0.5, 0.5);
 		}
 	}
-};
+}
 
 function explodeFunct(x, y)
 {
