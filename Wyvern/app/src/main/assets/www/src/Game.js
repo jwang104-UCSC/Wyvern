@@ -60,14 +60,16 @@ var Game =
 
 		//makes enemies
 		enemies = game.add.group();
-		enemies.enableBody = true;
-		enemies.physicsBodyType = Phaser.Physics.ARCADE;
+		eyes = game.add.group();
+	    meteors = game.add.group();
 
+		eyes.enableBody = true;
+		eyes.physicsBodyType = Phaser.Physics.ARCADE;
 	    for (var i = 0; i < 500; i++)
 	    { 
-	        var e = enemies.create(0, 0, 'eyes');
+	        var e = eyes.create(0, 0, 'eyes');
 	        //e.scale.setTo(0.9);
-	        e.name = 'enemy' + i;
+	        e.name = 'eyes' + i;
 			e.anchor.setTo(0.5, 0.5);
 			e.animations.add("fly", 
 				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], 20, true);
@@ -75,7 +77,28 @@ var Game =
 	        e.exists = false;
 	        e.visible = false;
 	        e.hp = enemyToughness;
+	        e.worth = 100;
 	    }
+
+
+		meteors.enableBody = true;
+		meteors.physicsBodyType = Phaser.Physics.ARCADE;
+	    for (var i = 0; i < 500; i++)
+	    { 
+	        var e = meteors.create(0, 0, 'meteor');
+	        //e.scale.setTo(0.9);
+	        e.name = 'rock' + i;
+			e.anchor.setTo(0.5, 0.5);
+			e.animations.add("fly", 
+				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18,19,20,21,22,23,24,25,26,27,28,29], 20, true);
+			e.play('fly');
+	        e.exists = false;
+	        e.visible = false;
+	        e.hp = enemyToughness-1;
+	        e.worth = 50;
+	    }
+	    enemies.add(eyes);
+	    enemies.add(meteors);
 
 		//make a barrier off the edges of screen to despawn offscreen enemies
 		screenEdge = game.add.group();
@@ -99,7 +122,6 @@ var Game =
 		hitbox = game.add.sprite(0, -50, "bullet");
 		sprite.addChild(hitbox);
 		hitbox.anchor.setTo(0.5, 0.5);
-		//hitbox.scale.setTo(0.9);
 		sprite.inputEnabled = true;
 		sprite.input.enableDrag(true);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
@@ -130,15 +152,22 @@ var Game =
 	    pauseButton.scale.setTo(0.6, 0.6);
 	    //shooting toggle AKA debug button make it do whatever you want for testing
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
-	    	function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
+	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
 	    	//function(){explodeFunct(game.world.width*0.5, 150);});
 	    	//function(){sprite.alpha = 1;});
+	    	function(){that.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);});
+	    	// function(){
+	    	// 	for(var i=0; i<5; i++){
+	    	// 		game.time.events.add(150*i, function(){that.spawnEnemy("meteors", -10, 220, 150, 0, -200, -100)});
+	    	// 	}
+	    		
+	    	// });
 	    	
 	    shootToggle.scale.setTo(0.6, 0.6);
 	    shootToggle.tint = 0xff0000;
 
 	    //uncomment this to test an enemy!
-	    //this.spawnEnemy(game.world.width*0.5, 150, 0, 0);
+	    this.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);
 	    //explodeFunct(game.world.width*0.5, 150);
 	},
 
@@ -153,27 +182,54 @@ var Game =
 		lifeCounter.text = "X " + lives;
 
 	    //collision tests
-	    game.physics.arcade.overlap(screenEdge, enemies,this.enemyOffScreen);
-	    game.physics.arcade.overlap(bullets, enemies, this.bulletHit);
-	    game.physics.arcade.overlap(hitbox, enemies, this.enemyTouched);
+	    game.physics.arcade.overlap(screenEdge, meteors,this.enemyOffScreen);
+	    game.physics.arcade.overlap(bullets, meteors, this.bulletHit);
+	    game.physics.arcade.overlap(hitbox, meteors, this.enemyTouched);
+	    //wonder if there's a better way to do this other than duplicating code for every enemy type
+	    game.physics.arcade.overlap(screenEdge, eyes,this.enemyOffScreen);
+	    game.physics.arcade.overlap(bullets, eyes, this.bulletHit);
+	    game.physics.arcade.overlap(hitbox, eyes, this.enemyTouched);
 	},
 
 	makeEnemy: function() 
-	{
+	{	
+		if (Math.random() > 0.3){
 		var x = game.rnd.integerInRange(0, game.world.width);
 		var xspeed = game.rnd.integerInRange(-40, 40);
 		var yspeed = game.rnd.integerInRange(75, 150);
-		this.spawnEnemy(x, -10, xspeed, yspeed);
+		this.spawnEnemy("meteors",x, -10, xspeed, yspeed);
+		}else{
+			if(Math.random()>0.5){mult=1;var x = -10;}
+			else {mult = -1; var x = game.world.width+10;}
+			var y = game.rnd.integerInRange(0, game.world.height-60);
+			var xspeed = game.rnd.integerInRange(75, 150)*mult;
+			var yspeed = game.rnd.integerInRange(50, 100)*mult;
+			for(var i=0; i<5; i++){
+	    			game.time.events.add(150*i, function(){that.spawnEnemy("eyes",x, y, xspeed, yspeed)});
+		}
+		}
 	},
 
-	spawnEnemy: function(x, y, xspeed, yspeed)
+	spawnEnemy: function(name, x, y, xspeed, yspeed,xaccel, yaccel)
 	{
-        enemy = enemies.getFirstExists(false);
+        switch(name){
+        	case "eyes":
+       			var enemy = eyes.getFirstExists(false);
+       			break;
+       		case "meteors":
+       			var enemy = meteors.getFirstExists(false);
+       			break;
+        }
+
         if (enemy)
         {
+        	if(xaccel == null) xaccel = 0;
+        	if(yaccel == null) yaccel = 0;
             enemy.reset(x, y);
             enemy.body.velocity.x = xspeed;
             enemy.body.velocity.y = yspeed;
+            enemy.body.gravity.x = xaccel;
+            enemy.body.gravity.y = yaccel;
             spawnTime = game.time.now + 800;
         }
 	},
@@ -221,12 +277,12 @@ var Game =
 	    if(victim.hp <= 0)
 	    {
 		    victim.kill();
-		    enemiesKilled++;
 		    //reset hp
 		    victim.hp = enemyToughness;
 		    //Increase the score
-		    score += 100;
-		    var pop = numPopup("100", victim.body.x, victim.body.y);
+		    score += victim.worth;
+		    enemiesKilled += victim.worth/100;
+		    numPopup(victim.worth.toString(), victim.body.x, victim.body.y);
 		    if(enemiesKilled%10==0)
 		    {
 		    	lives++;
