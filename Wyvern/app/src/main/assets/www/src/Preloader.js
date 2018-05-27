@@ -19,6 +19,7 @@ var Preloader = {
 		game.load.image('bullet', 'img/bullet.png');
 		game.load.image('dragon', 'img/dragon.png');
 		game.load.image('fireball', 'img/fireball.png');
+		game.load.image('dorito', 'img/doritos.png');
 		game.load.spritesheet('explode', 'img/explode.png', 128, 128);
 		game.load.spritesheet('eyes', 'img/eyes35x32.png', 35, 32, 16);
 		game.load.spritesheet('letters', 'img/letters-white.png', 9, 8, 26);

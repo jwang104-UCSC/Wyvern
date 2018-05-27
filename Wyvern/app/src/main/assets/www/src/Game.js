@@ -2,6 +2,7 @@ var Game =
 {
 	create: function() {
 		that = this;
+		verbose = false;
 		//Setup gameplay variables here
 		shootRateMultiplier = 1;
 		baseShotSpeed = -200;
@@ -57,7 +58,21 @@ var Game =
 	        b.events.onOutOfBounds.add(resetFunct, this);
 	    }
 
+		//makes drops
+		drops = game.add.group();
+		drops.enableBody = true;
+		drops.physicsBodyType = Phaser.Physics.ARCADE;
 
+	    for (var i = 0; i < 100; i++)
+	    { 
+	        var d = drops.create(0, 0, 'dorito');
+	        d.name = 'drop' + i;
+	        d.exists = false;
+	        d.visible = false;
+	        d.checkWorldBounds = true;
+	        d.events.onOutOfBounds.add(resetFunct, this);
+	        d.body.maxVelocity.setTo(0, 600);
+	    }
 
 		//makes enemies
 		//enemies = game.add.group();
@@ -153,10 +168,10 @@ var Game =
 	    pauseButton.scale.setTo(0.6, 0.6);
 	    //shooting toggle AKA debug button make it do whatever you want for testing
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
-	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
+	    	function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
 	    	//function(){explodeFunct(game.world.width*0.5, 150);});
 	    	//function(){sprite.alpha = 1;});
-	    	function(){that.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);});
+	    	//function(){that.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);});
 	    	// function(){
 	    	// 	for(var i=0; i<5; i++){
 	    	// 		game.time.events.add(150*i, function(){that.spawnEnemy("meteors", -10, 220, 150, 0, -200, -100)});
@@ -168,7 +183,7 @@ var Game =
 	    shootToggle.tint = 0xff0000;
 
 	    //uncomment this to test an enemy!
-	    //this.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);
+	    //this.spawnEnemy("eyes",game.world.width*0.5, 150, 0, 0);
 	    //explodeFunct(game.world.width*0.5, 150);
 	},
 
@@ -270,7 +285,7 @@ var Game =
 	bulletHit: function(shot, victim) 
 	{
 		//remove the shot sprite
-		shot.kill();
+		resetFunct(shot);
 		score++;
 	    victim.hp--;
 	    victim.tint = 0xFF0000;
@@ -279,7 +294,7 @@ var Game =
 	    //check if victim dies
 	    if(victim.hp <= 0)
 	    {
-		    victim.kill();
+		    resetFunct(victim);
 		    //reset hp
 		    victim.hp = enemyToughness;
 		    //Increase the score
@@ -422,11 +437,8 @@ function explodeFunct(x, y)
 }
 function resetFunct(object)
 {
-//console.log(object.name+" just reset");
+if(verbose)console.log(object.name+" just reset");
 object.kill();
-}
-function alphabet2number(letter){
-	return letter.toUpperCase().charCodeAt()-65
 }
 function textPopup(string, x, y){
 	var letters = game.add.group();
@@ -467,4 +479,38 @@ function numPopup(string, x, y){
     	n.events.onOutOfBounds.add(resetFunct, this);
 	}
     return numbers;
+}
+
+
+function textPop(string, x, y){
+	var pop = game.add.group();
+	pop.enableBody = true;
+	pop.physicsBodyType = Phaser.Physics.ARCADE;
+	for (var i = 0; i < string.length; i++) {
+		var frame = 0;
+		switch(string.charAt(i)){
+			case " ":continue; //skips the rest of the for loop
+			case "0":frame = 9;break;
+			case ".":frame = 10;break;
+			case "-":frame = 11;break;
+		}
+		//decide if the char is a letter or number
+		if (string.charAt(i).charCodeAt()>57) {
+			var p = pop.create(x+9*i, y, "letters");
+			p.frame = string.charAt(i).toUpperCase().charCodeAt()-65;
+		}
+  		else {
+  			var p = pop.create(x+9*i, y, "numbers");
+	  		if (frame == 0) p.frame = string.charAt(i).charCodeAt()-49;
+	  		else p.frame = frame;
+  		}	
+    	p.body.velocity.y=-100;
+    	p.body.gravity.y=200;
+    	p.body.maxVelocity.y = 150;
+    	game.add.tween(p).to( { alpha: 0 }, 1200, Phaser.Easing.Linear.None, true);
+    	p.name = string.charAt(i);
+    	p.checkWorldBounds = true;
+    	p.events.onOutOfBounds.add(resetFunct, this);
+	}
+    return pop;
 }
