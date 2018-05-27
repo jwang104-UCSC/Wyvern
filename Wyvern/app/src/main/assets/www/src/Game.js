@@ -32,8 +32,9 @@ var Game =
 		canShoot = true;
 		hurtTime = 0;
 
-		enemyToughness = 4;
+		enemyToughness = 2;
 		enemiesKilled = 0;
+		spawnDelay = 400;
 		//gameplay-related vars end
 
 		//background
@@ -94,7 +95,7 @@ var Game =
 			e.play('fly');
 	        e.exists = false;
 	        e.visible = false;
-	        e.hp = enemyToughness-1;
+	        e.hp = enemyToughness+1;
 	        e.worth = 50;
 	    }
 	    // enemies.add(eyes);
@@ -204,8 +205,10 @@ var Game =
 			var y = game.rnd.integerInRange(0, game.world.height-60);
 			var xspeed = game.rnd.integerInRange(75, 150)*mult;
 			var yspeed = game.rnd.integerInRange(50, 100)*mult;
+			var xaccel = game.rnd.integerInRange(0, 80)*mult*-1;
+			var yaccel = game.rnd.integerInRange(0, 80)*mult*-1;
 			for(var i=0; i<5; i++){
-	    			game.time.events.add(150*i, function(){that.spawnEnemy("eyes",x, y, xspeed, yspeed)});
+	    			game.time.events.add(150*i, function(){that.spawnEnemy("eyes",x, y, xspeed, yspeed, xaccel, yaccel)});
 		}
 		}
 	},
@@ -230,7 +233,7 @@ var Game =
             enemy.body.velocity.y = yspeed;
             enemy.body.gravity.x = xaccel;
             enemy.body.gravity.y = yaccel;
-            spawnTime = game.time.now + 800;
+            spawnTime = game.time.now + spawnDelay;
         }
 	},
 	
@@ -294,7 +297,7 @@ var Game =
 
 	enemyTouched: function(player, enemy) 
 	{
-    	Game.killFunct();
+    	that.killFunct();
     	enemy.kill();
     },
 
