@@ -300,7 +300,7 @@ var Game =
 		    //Increase the score
 		    score += victim.worth;
 		    enemiesKilled += victim.worth/100;
-		    numPopup(victim.worth.toString(), victim.body.x, victim.body.y);
+		    textPop(victim.worth.toString(), victim.body.x, victim.body.y);
 		    if(enemiesKilled%10==0)
 		    {
 		    	lives++;
@@ -440,47 +440,6 @@ function resetFunct(object)
 if(verbose)console.log(object.name+" just reset");
 object.kill();
 }
-function textPopup(string, x, y){
-	var letters = game.add.group();
-	letters.enableBody = true;
-	letters.physicsBodyType = Phaser.Physics.ARCADE;
-	for (var i = 0; i < string.length; i++) {
-		if(string.charAt(i) == " ")continue;
-  		var l = letters.create(x+9*i, y, "letters");
-    	l.frame = string.charAt(i).toUpperCase().charCodeAt()-65;
-    	l.body.velocity.y=-100;
-    	l.body.gravity.y=200;
-    	l.body.maxVelocity.y = 150;
-    	game.add.tween(l).to( { alpha: 0 }, 1200, Phaser.Easing.Linear.None, true, 0, 1000, true);
-    	l.name = string.charAt(i);
-    	l.checkWorldBounds = true;
-    	l.events.onOutOfBounds.add(resetFunct, this);
-	}
-    return letters;
-}
-function numPopup(string, x, y){
-	var numbers = game.add.group();
-	numbers.enableBody = true;
-	numbers.physicsBodyType = Phaser.Physics.ARCADE;
-	for (var i = 0; i < string.length; i++) {
-		if(string.charAt(i) == " ")continue;
-  		var n = numbers.create(x+9*i, y, "numbers");
-  		if(string.charAt(i) == ".")n.frame =10;
-  		if(string.charAt(i) == "-")n.frame =11;
-  		if(string.charAt(i) == "0")n.frame =9;
-  		else 
-  		n.frame = string.charAt(i).charCodeAt()-49;
-    	n.body.velocity.y=-100;
-    	n.body.gravity.y=200;
-    	n.body.maxVelocity.y = 150;
-    	game.add.tween(n).to( { alpha: 0 }, 1200, Phaser.Easing.Linear.None, true);
-    	n.name = string.charAt(i);
-    	n.checkWorldBounds = true;
-    	n.events.onOutOfBounds.add(resetFunct, this);
-	}
-    return numbers;
-}
-
 
 function textPop(string, x, y){
 	var pop = game.add.group();
