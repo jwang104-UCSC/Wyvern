@@ -24,7 +24,7 @@ var Game =
 		if(typeof lives === 'undefined'|| lives <= 0) 
 		{
 			//lives = 1; //only 1 to die faster
-			lives = 5; //set to 5 for testing
+			lives = 0; //set to 5 for testing
 		} 
 
 		spawnTime = 0;
@@ -132,7 +132,7 @@ var Game =
 		screenRightBar.height = 1.5*game.world.height;
 
 		//player
-		sprite = game.add.sprite(game.world.centerX, game.world.centerY*1.8, 'dragon');
+		sprite = game.add.sprite(game.world.width*0.5, game.world.centerY*1.8, 'dragon');
 		sprite.scale.setTo(0.35);
 		sprite.anchor.setTo(0.5, 0.8);
 		hitbox = game.add.sprite(0, -50, "bullet");
@@ -331,7 +331,7 @@ var Game =
 			    	game.time.events.add(100*i, this.spriteBlink);
 			    }
 		    }
-		    if (lives <= 0)
+		    if (lives < 0)
 		    {
 			    this.gameOver();
 			    //sprite.visible = false;
@@ -354,8 +354,24 @@ var Game =
 
 	gameOver: function()
 	{
-		console.log("Game over");
-		Game.pauseFunct("DEFEAT", 50);
+		//console.log("Game over");
+		this.pauseFunct("DEFEAT", 50);
+		var textFormat = {font:'16px Arial', fill:'#fff'};
+		var highscore = parseInt(Cookies.get("highscore"));
+		if (isNaN(highscore)) highscore = 0;
+		console.log("old highscore: " + highscore);
+
+		var endScore = game.add.text(game.world.width*0.5, game.world.height*0.5, "Final score: " + score, textFormat);
+		if(score>highscore){
+			highscore = score;
+			Cookies.set("highscore", score);
+			var newHigh = game.add.text(game.world.width*0.5, game.world.height*0.6, "New highscore!", {font:'16px Arial', fill:'#ffff00'});
+			newHigh.anchor.setTo(0.5);
+		}
+		var highscoreText = game.add.text(game.world.width*0.5, game.world.height*0.55, "Highscore: " + highscore, textFormat);
+		endScore.anchor.setTo(0.5);
+		highscoreText.anchor.setTo(0.5);
+
 		retryButton = createButton("Retry", 15, game.world.width*0.5, game.world.height*0.7,
 						 80, 30, function(){game.state.restart(); game.paused = false;});
 		exitButton  = createButton("Main Menu", 15, game.world.width*0.5, game.world.height*0.8,
@@ -404,7 +420,7 @@ var Game =
 
 		if (x == undefined)
 		{
-			textX = game.world.centerX;
+			textX = game.world.width*0.5;
 		}
 		else 
 		{

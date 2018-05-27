@@ -1,4 +1,4 @@
-var MainMenu = 
+var Settings = 
 {
 	create: function() 
 	{
@@ -6,13 +6,10 @@ var MainMenu =
 		gameTitle = game.add.sprite(game.world.width*0.5, game.world.height*0.1, 'title');
 		gameTitle.anchor.set(0.5,0);
 
-		//Create the title screen buttons
-		startButton    = createButton("Start Game", 15, game.world.width*0.5, game.world.height*0.6, 
+		scoreReset = createButton("Reset Highscore", 15, game.world.width*0.3, game.world.height*0.5, 
+								120, 30, function(){Cookies.remove("highscore")});
+		startButton    = createButton("Start Game", 15, game.world.width*0.5, game.world.height*0.9, 
 								80, 30, function(){game.state.start('Howto')});
-		settingsButton = createButton("Settings", 15, game.world.width*0.5, game.world.height*0.7, 
-								80, 30, function(){game.state.start('Settings')});
-		shopButton     = createButton("Shop", 15, game.world.width*0.5, game.world.height*0.8, 
-								80, 30, function(){game.state.start('Shop')});
 	}
 }
 
