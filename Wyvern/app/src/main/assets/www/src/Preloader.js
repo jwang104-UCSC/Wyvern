@@ -9,7 +9,7 @@ var Preloader = {
 		game.load.image('screen-bg', 'img/screen-bg.png');
 		game.load.image('screen-mainmenu', 'img/screen-mainmenu.png');
 		game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
-		game.load.image('starfield', 'img/starfield.png');
+		//game.load.image('starfield', 'img/starfield.png');
 		//game.load.image('redsky', 'img/redsky.jpg');
 		game.load.image('redsky', 'img/redskyloop.png');
 		game.load.image('pauseScreen', 'img/pause-screen.png');
