@@ -33,7 +33,7 @@ var Game =
 
 		enemyToughness = 2;
 		enemiesKilled = 0;
-		spawnDelay = 400;
+		spawnDelay = 200;
 		//gameplay-related vars end
 
 		//background
@@ -214,18 +214,18 @@ var Game =
 
 	makeEnemy: function() 
 	{	
-		if (Math.random() > 0.3){
+		if (Math.random() > 0.2){
 		var x = game.rnd.integerInRange(0, game.world.width);
 		var xspeed = game.rnd.integerInRange(-40, 40);
-		var yspeed = game.rnd.integerInRange(75, 150);
+		var yspeed = game.rnd.integerInRange(150, 250);
 		this.spawnEnemy("meteors",x, -10, xspeed, yspeed);
 		}else{
 			var mult = 1;
 			if(Math.random()>0.5){var x = -10;}
 			else {mult = -1; var x = game.world.width+10;}
 			var y = game.rnd.integerInRange(0, game.world.height-60);
-			var xspeed = game.rnd.integerInRange(75, 150)*mult;
-			var yspeed = game.rnd.integerInRange(50, 100)*mult;
+			var xspeed = game.rnd.integerInRange(75, 200)*mult;
+			var yspeed = game.rnd.integerInRange(50, 150)*mult;
 			var xaccel = game.rnd.integerInRange(0, 80)*mult*-1;
 			var yaccel = game.rnd.integerInRange(0, 80)*mult*-1;
 			for(var i=0; i<5; i++){
