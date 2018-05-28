@@ -28,7 +28,7 @@ var MainMenu =
 
 		//Create the title screen buttons
 		startButton    = createButton("Start Game", 10, game.world.width*0.4, game.world.height*0.725, 
-								140, 30, function(){game.state.start('Howto')});
+								140, 30, function(){game.state.start('Hub')}); //Changed from tutorial placeholder
 		settingsButton = createButton("Settings", 10, game.world.width*0.325, game.world.height*0.825, 
 								110, 30, function(){game.state.start('Settings')});
 		shopButton     = createButton("Shop", 10, game.world.width*0.225, game.world.height*0.925, 

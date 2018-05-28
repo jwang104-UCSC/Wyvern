@@ -14,7 +14,7 @@ var Shop =
 		upgradeSpread = createButton("Spread", 10, game.world.width*0.3, game.world.height*0.4, 
 						80, 30, function(){Shop.spreadPlus()});
 		upgradeShield = createButton("Shield", 10, game.world.width*0.3, game.world.height*0.5, 
-						80, 30, function(){Shop.spreadPlus()});
+						80, 30, function(){Shop.shieldPlus()});
 		returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.6, 
 								160, 30, function(){game.state.start('MainMenu')});
 	},
@@ -25,7 +25,8 @@ var Shop =
 		update = game.add.text(game.world.centerX, game.world.centerY*0.5,
 						"Lives Increased!", {font:"px Verdana", fill:"#0", align:"center"});
 		game.time.events.add(1000, function(){game.add.tween(update).to({y: 0, alpha: 0}, 1500, Phaser.Easing.Linear.None, true)}, this);
-		Cookies.set("lives", parseInt(Cookies.get("lives"))++); //add lives to cookie
+		tempLives = parseInt(Cookies.get("lives"));
+		Cookies.set('lives', tempLives++); //add lives to cookie
 	},
 
 	spreadPlus: function()
@@ -33,6 +34,14 @@ var Shop =
 		shotSpread++;
 		update2 = game.add.text(game.world.centerX, game.world.centerY*0.5,
 						"Spread Increased!", {font:"px Verdana", fill:"#0", align:"center"});
+		game.time.events.add(1000, function(){game.add.tween(update2).to({y: 0, alpha: 0}, 1500, Phaser.Easing.Linear.None, true)}, this);
+	},
+
+	shieldPlus: function()
+	{
+		//shotSpread++;
+		update3 = game.add.text(game.world.centerX, game.world.centerY*0.5,
+						"Shield Power Increased!", {font:"px Verdana", fill:"#0", align:"center"});
 		game.time.events.add(1000, function(){game.add.tween(update2).to({y: 0, alpha: 0}, 1500, Phaser.Easing.Linear.None, true)}, this);
 	}
 }
