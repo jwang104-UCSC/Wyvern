@@ -36,6 +36,12 @@ var Game =
 		spawnDelay = 200;
 		//gameplay-related vars end
 
+		//background music
+		//comment out the music for testing if you want
+		bgm = game.add.audio('cosmosBGM');
+		bgm.play();
+		bgm.volume = 0.2;
+
 		//background
 		back = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
 		back.tint = 0x808080;
