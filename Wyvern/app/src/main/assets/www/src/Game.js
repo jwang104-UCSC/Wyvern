@@ -428,9 +428,9 @@ var Game =
 		highscoreText.anchor.setTo(0.5);
 
 		retryButton = createButton("Retry", 15, game.world.width*0.5, game.world.height*0.7,
-						 80, 30, function(){game.state.restart(); game.paused = false;});
+						 100, 30, function(){game.state.restart(); game.paused = false;});
 		exitButton  = createButton("Main Menu", 15, game.world.width*0.5, game.world.height*0.8,
-						 80, 30, function(){game.state.start('MainMenu'); game.paused = false;});
+						 175, 30, function(){game.state.start('MainMenu'); game.paused = false;});
 		//game.paused = true;
 		//lives = 5;
 	},

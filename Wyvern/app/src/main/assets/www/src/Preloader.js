@@ -31,7 +31,9 @@ var Preloader = {
 		
 		game.load.bitmapFont('buttonStyle', 'img/carrier_command.png', 'img/carrier_command.xml');
 		game.load.bitmapFont('titleFont', 'img/desyrel.png', 'img/desyrel.xml');
-		game.load.audio('buttonSFX', 'img/sword.mp3');
+
+
+		game.load.audio('buttonSFX', 'sfx/sword.mp3');
 
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 		game.load.image('pauseBtn', 'img/pause.png');
