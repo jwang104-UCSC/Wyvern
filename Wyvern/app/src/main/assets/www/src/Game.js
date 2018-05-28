@@ -21,11 +21,9 @@ var Game =
 		iFrames = 1;
 		score = 0;
 
-		if(typeof lives === 'undefined'|| lives <= 0) 
-		{
-			//lives = 1; //only 1 to die faster
-			lives = 5; //set to 5 for testing
-		} 
+		// Save the lives as a cookie
+		lives = parseInt(Cookies.get("lives"));
+		if (isNaN(lives)) lives = 5;
 
 		spawnTime = 0;
 		bulletTime = 0;
@@ -449,13 +447,13 @@ var Game =
 		}//if not paused, pause and make menu
 		else
 		{
-			that.pauseFunct("Paused!", 50);
-			resumeBtn = createButton("Resume",15,game.world.width*0.5, game.world.height*0.6,
-							 80, 30, that.pauseMenu);
-			restartBtn = createButton("Restart",15,game.world.width*0.5, game.world.height*0.7,
-							 80, 30, function(){game.state.restart(); game.paused = false;});
-			menuBtn = createButton("Menu",15,game.world.width*0.5, game.world.height*0.8,
-							 80, 30, function(){game.state.start('MainMenu'); game.paused = false;});
+			that.pauseFunct("PAUSED!", 50);
+			resumeBtn = createButton("Resume",10,game.world.width*0.5, game.world.height*0.6,
+							 100, 30, that.pauseMenu);
+			restartBtn = createButton("Restart",10,game.world.width*0.5, game.world.height*0.7,
+							 100, 30, function(){game.state.restart(); game.paused = false;});
+			menuBtn = createButton("Menu",10,game.world.width*0.5, game.world.height*0.8,
+							 100, 30, function(){game.state.start('MainMenu'); game.paused = false;});
 
 		}
 	},
@@ -493,8 +491,9 @@ var Game =
 			textY = y;
 		}
 		pauseScreen = game.add.sprite(0, 0, 'pauseScreen');
-		pauseText   = game.add.text(textX, textY,
-						string, {font:50 + "px Verdana", fill:"#FFF", align:"center"});
+		pauseText   = game.add.bitmapText(textX, textY, 'titleFont', string, 40);
+		//game.add.text(textX, textY, string, {font:50 + "px Verdana", fill:"#FFF", align:"center"});
+		pauseText.tint = 0xFFFFF;
 		pauseText.anchor.setTo(0.5, 0.5);
 		}
 	}

@@ -3,29 +3,27 @@ var Settings =
 	create: function() 
 	{
 		game.add.sprite(0, 0, 'screen-bg');
-		gameTitle = game.add.sprite(game.world.width*0.5, game.world.height*0.1, 'title');
-		gameTitle.anchor.set(0.5,0);
 
-		scoreReset = createButton("Reset Highscore", 15, game.world.width*0.3, game.world.height*0.5, 
-								120, 30, function(){Cookies.remove("highscore")});
-		startButton    = createButton("Start Game", 15, game.world.width*0.5, game.world.height*0.9, 
-								80, 30, function(){game.state.start('Howto')});
+		var txt = game.add.bitmapText(game.world.width*0.5, game.world.height*0.1, 'titleFont', "SETTINGS", 40);
+		txt.tint = 0xFFFFF;
+		txt.anchor.setTo(0.5,0.5);
+
+		scoreReset   = createButton("Reset Highscore", 10, game.world.width*0.5, game.world.height*0.5, 
+								200, 30, function(){Cookies.remove("highscore")});
+		muteButton   = createButton("Mute Sound", 10, game.world.width*0.5, game.world.height*0.6, 
+								140, 30, function(){soundControl()});
+		returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.7, 
+								160, 30, function(){game.state.start('MainMenu')});
 	}
 }
 
-function createButton(string,fontsize,x,y,w,h,callback)
+//Simple mute control 
+function soundControl()
 {
-	var button1 = game.add.button(x,y,'button',callback,this,2,1,0);
-	button1.anchor.setTo(0.5,0.5);
-	button1.width = w;
-	button1.height = h;
-	var txt = game.add.text(button1.x,button1.y,string,{font:fontsize+"px Arial", fill: "#f",align:"center"});
-	txt.anchor.setTo(0.5,0.5);
-	return {"0":button1,"1":txt};
-}
-
-function removeButton(object)
-{
-	object[0].kill();
-	object[1].kill();
+	if(game.sound.mute)
+	{
+		game.sound.mute = false;
+		return;
+	}
+	game.sound.mute = true;
 }

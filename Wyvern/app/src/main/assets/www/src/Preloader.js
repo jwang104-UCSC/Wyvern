@@ -5,7 +5,7 @@ var Preloader = {
 		preloadBar.anchor.setTo(0.5,0.5);
 		game.load.setPreloadSprite(preloadBar);
 
-		game.load.image('title', 'img/title.png');
+		game.load.image('mainMenu-bg', 'img/mainMenu-bg.png')
 		game.load.image('screen-bg', 'img/screen-bg.png');
 		//game.load.image('screen-mainmenu', 'img/screen-mainmenu.png');
 		game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
@@ -29,8 +29,11 @@ var Preloader = {
 		game.load.spritesheet('numbers', 'img/numbers-white.png', 9, 8, 12);
 		game.load.spritesheet('meteor', 'img/meteorite-fixed.png', 32, 32, 30);
 		
-		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
+		game.load.bitmapFont('buttonStyle', 'img/carrier_command.png', 'img/carrier_command.xml');
+		game.load.bitmapFont('titleFont', 'img/desyrel.png', 'img/desyrel.xml');
+		game.load.audio('buttonSFX', 'img/sword.mp3');
 
+		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 		game.load.image('pauseBtn', 'img/pause.png');
 		//game.load.spritesheet('button-start', 'img/button-start.png', 146, 51);
 		game.load.spritesheet('button', 'img/flixel-button.png', 80, 20);
