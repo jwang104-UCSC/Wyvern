@@ -24,7 +24,7 @@ var Game =
 		if(typeof lives === 'undefined'|| lives <= 0) 
 		{
 			//lives = 1; //only 1 to die faster
-			lives = 0; //set to 5 for testing
+			lives = 5; //set to 5 for testing
 		} 
 
 		spawnTime = 0;
@@ -63,15 +63,18 @@ var Game =
 		drops.enableBody = true;
 		drops.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 100; i++)
+	    for (var i = 0; i < 20; i++)
 	    { 
-	        var d = drops.create(0, 0, 'dorito');
+	        var d = drops.create(0, 0, 'wat');
+	        d.dropType = 0;
 	        d.name = 'drop' + i;
+	        d.scale.setTo(0.6)
+	        d.anchor.setTo(0.5, 0.5);
 	        d.exists = false;
 	        d.visible = false;
 	        d.checkWorldBounds = true;
 	        d.events.onOutOfBounds.add(resetFunct, this);
-	        d.body.maxVelocity.setTo(0, 600);
+	        d.body.maxVelocity.setTo(300);
 	    }
 
 		//makes enemies
@@ -81,10 +84,9 @@ var Game =
 
 		eyes.enableBody = true;
 		eyes.physicsBodyType = Phaser.Physics.ARCADE;
-	    for (var i = 0; i < 500; i++)
+	    for (var i = 0; i < 100; i++)
 	    { 
 	        var e = eyes.create(0, 0, 'eyes');
-	        //e.scale.setTo(0.9);
 	        e.name = 'eyes' + i;
 			e.anchor.setTo(0.5, 0.5);
 			e.animations.add("fly", 
@@ -99,10 +101,9 @@ var Game =
 
 		meteors.enableBody = true;
 		meteors.physicsBodyType = Phaser.Physics.ARCADE;
-	    for (var i = 0; i < 500; i++)
+	    for (var i = 0; i < 100; i++)
 	    { 
 	        var e = meteors.create(0, 0, 'meteor');
-	        //e.scale.setTo(0.9);
 	        e.name = 'rock' + i;
 			e.anchor.setTo(0.5, 0.5);
 			e.animations.add("fly", 
@@ -136,7 +137,12 @@ var Game =
 		sprite.scale.setTo(0.35);
 		sprite.anchor.setTo(0.5, 0.8);
 		hitbox = game.add.sprite(0, -50, "bullet");
+		invuln = game.add.sprite(0, 0-48, "invuln");
+		invuln.anchor.setTo(0.5, 0.5);
+		invuln.scale.setTo(1.25);
+		invuln.alpha = 0;
 		sprite.addChild(hitbox);
+		sprite.addChild(invuln);
 		hitbox.anchor.setTo(0.5, 0.5);
 		sprite.inputEnabled = true;
 		sprite.input.enableDrag(true);
@@ -201,6 +207,7 @@ var Game =
 	    game.physics.arcade.overlap(screenEdge, meteors,this.enemyOffScreen);
 	    game.physics.arcade.overlap(bullets, meteors, this.bulletHit);
 	    game.physics.arcade.overlap(hitbox, meteors, this.enemyTouched);
+	    game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
 	    //wonder if there's a better way to do this other than duplicating code for every enemy type
 	    game.physics.arcade.overlap(screenEdge, eyes,this.enemyOffScreen);
 	    game.physics.arcade.overlap(bullets, eyes, this.bulletHit);
@@ -215,7 +222,8 @@ var Game =
 		var yspeed = game.rnd.integerInRange(75, 150);
 		this.spawnEnemy("meteors",x, -10, xspeed, yspeed);
 		}else{
-			if(Math.random()>0.5){mult=1;var x = -10;}
+			var mult = 1;
+			if(Math.random()>0.5){var x = -10;}
 			else {mult = -1; var x = game.world.width+10;}
 			var y = game.rnd.integerInRange(0, game.world.height-60);
 			var xspeed = game.rnd.integerInRange(75, 150)*mult;
@@ -254,7 +262,7 @@ var Game =
 	
 	enemyOffScreen: function(bar, enemy)
 	{
-		enemy.hp = enemyToughness;
+		that.enemyHpReset(enemy);
 		resetFunct(enemy);
 	},
 
@@ -296,7 +304,7 @@ var Game =
 	    {
 		    resetFunct(victim);
 		    //reset hp
-		    victim.hp = enemyToughness;
+		    that.enemyHpReset(victim);
 		    //Increase the score
 		    score += victim.worth;
 		    enemiesKilled += victim.worth/100;
@@ -307,9 +315,58 @@ var Game =
 		    }
 		    //explode
 		    explodeFunct(victim.body.x, victim.body.y);
+
+		    //rng to check if an item drops
+		     if (Math.random() > 0.95)
+	    	 	that.makeDrops(victim.body.x, victim.body.y);
 		}
 	},
-
+	itemPickup: function(player, drop) {
+	    resetFunct(drop);
+	    //applies buff
+	    //if you come up with more buff ideas, simply add another case
+	    switch(drop.dropType){
+	    	case 0: 	console.log("invuln");
+	    				if (!(typeof invulnEvent === "undefined"))
+	    						game.time.events.remove(invulnEvent);
+	    				invuln.alpha=0.8;
+	    				hurtTime = game.time.now + 9000;
+	    				invulnEvent = game.time.events.add(9000, function(){invuln.alpha = 0;lives++;that.killFunct();});
+	    				break;
+	    	case 1: 	console.log("hi"); break;
+	    	case 2: 	console.log("no"); break;
+	    	default: 	console.log("I don't know what you just picked up"); break;
+	    }
+	},
+	makeDrops: function(x, y)
+	{
+		drop = drops.getFirstExists(false);
+       	if (drop)
+       	{	
+       		var item = game.rnd.integerInRange(0, 2);
+       		//var item = 0;
+       		drop.dropType = item;
+       		switch(item){
+       			case 0: drop.loadTexture("wat");break;
+       			case 1: drop.loadTexture("hi");break;
+       			case 2: drop.loadTexture("no");break;
+       		}
+       		var xmult = 1;
+       		var ymult = 1;
+            drop.reset(x, y);
+            drop.body.collideWorldBounds = true;
+            if (Math.random() > 0.5) ymult = -1;
+            if (Math.random() > 0.5) xmult = -1;
+            drop.body.velocity.y = 70*ymult;
+            drop.body.velocity.x = 70*xmult;
+            drop.body.bounce.set(1.3);
+            game.time.events.add(4500, function(){drop.body.collideWorldBounds = false});
+        }
+	},
+	enemyHpReset: function(enemy){
+	    if(enemy.key == "meteors") enemy.hp = enemyToughness+1;
+    	else enemy.hp = enemyToughness;
+	},
 	enemyTouched: function(player, enemy) 
 	{
     	that.killFunct();
