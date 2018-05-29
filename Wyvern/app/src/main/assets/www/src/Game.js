@@ -7,6 +7,7 @@ var Game =
 		shootRateMultiplier = 1;
 		baseShotSpeed = -200;
 		shotSpeedMultiplier = 1;
+		dropRate = 0.05;
 
 		/* For the FIRST level, there probably won't be upgrades.
 		   Check if we've setup the variables first, otherwise
@@ -38,9 +39,9 @@ var Game =
 
 		//background music
 		//comment out the music for testing if you want
-		bgm = game.add.audio('cosmosBGM');
-		bgm.play();
-		bgm.volume = 0.2;
+		// bgm = game.add.audio('cosmosBGM');
+		// bgm.play();
+		// bgm.volume = 0.2;
 
 		//background
 		back = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
@@ -67,9 +68,9 @@ var Game =
 		drops.enableBody = true;
 		drops.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 20; i++)
+	    for (var i = 0; i < 100; i++)
 	    { 
-	        var d = drops.create(0, 0, 'wat');
+	        var d = drops.create(0, 0, 'shield');
 	        d.dropType = 0;
 	        d.name = 'drop' + i;
 	        d.scale.setTo(0.6)
@@ -77,8 +78,10 @@ var Game =
 	        d.exists = false;
 	        d.visible = false;
 	        d.checkWorldBounds = true;
+	        d.body.collideWorldBounds = true;
 	        d.events.onOutOfBounds.add(resetFunct, this);
 	        d.body.maxVelocity.setTo(300);
+	        d.timer = null;
 	    }
 
 		//makes enemies
@@ -162,6 +165,10 @@ var Game =
 	    	boom.animations.add('explode');
 	    });
 
+	    bigboom = game.add.group();
+	    bigboom.enableBody = true;
+	    bigboom.createMultiple(100, 'bombboom');
+
 		//These coord offsets are probably all wrong once we get real sprites
 		//UI
 
@@ -178,7 +185,9 @@ var Game =
 	    pauseButton.scale.setTo(0.6, 0.6);
 	    //shooting toggle AKA debug button make it do whatever you want for testing
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
-	    	function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
+	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
+	    	function(){that.bombPickup(hitbox.body.x, hitbox.body.y)});
+	    	//function(){that.makeDrops(50, 50)});
 	    	//function(){explodeFunct(game.world.width*0.5, 150);});
 	    	//function(){sprite.alpha = 1;});
 	    	//function(){that.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);});
@@ -208,14 +217,17 @@ var Game =
 		lifeCounter.text = "X " + lives;
 
 	    //collision tests
+		game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
 	    game.physics.arcade.overlap(screenEdge, meteors,this.enemyOffScreen);
 	    game.physics.arcade.overlap(bullets, meteors, this.bulletHit);
 	    game.physics.arcade.overlap(hitbox, meteors, this.enemyTouched);
-	    game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
+	    game.physics.arcade.overlap(bigboom, meteors, this.enemyBombed);
+
 	    //wonder if there's a better way to do this other than duplicating code for every enemy type
 	    game.physics.arcade.overlap(screenEdge, eyes,this.enemyOffScreen);
 	    game.physics.arcade.overlap(bullets, eyes, this.bulletHit);
 	    game.physics.arcade.overlap(hitbox, eyes, this.enemyTouched);
+	    game.physics.arcade.overlap(bigboom, eyes, this.enemyBombed);
 	},
 
 	makeEnemy: function() 
@@ -306,26 +318,30 @@ var Game =
 	    //check if victim dies
 	    if(victim.hp <= 0)
 	    {
-		    resetFunct(victim);
-		    //reset hp
-		    that.enemyHpReset(victim);
-		    //Increase the score
-		    score += victim.worth;
-		    enemiesKilled += victim.worth/100;
-		    textPop(victim.worth.toString(), victim.body.x, victim.body.y);
+	    	that.victimDies(victim, victim.worth);
+	    	enemiesKilled += victim.worth/100;
 		    if(enemiesKilled%10==0)
 		    {
 		    	lives++;
 		    }
-		    //explode
-		    explodeFunct(victim.body.x, victim.body.y);
 
 		    //rng to check if an item drops
-		     if (Math.random() > 0.95)
+		     if (Math.random() < dropRate)
 	    	 	that.makeDrops(victim.body.x, victim.body.y);
 		}
 	},
+	victimDies: function(victim, scoreGain){
+		    resetFunct(victim);
+		    //reset hp
+		    that.enemyHpReset(victim);
+		    //Increase the score
+		    score += scoreGain;
+		    if(scoreGain != 0) textPop(scoreGain.toString(), victim.body.x, victim.body.y);
+		    explodeFunct(victim.body.x, victim.body.y);
+	},
 	itemPickup: function(player, drop) {
+        if (!(typeof drop.timer === "undefined"))
+					game.time.events.remove(drop.timer);
 	    resetFunct(drop);
 	    //applies buff
 	    //if you come up with more buff ideas, simply add another case
@@ -334,15 +350,17 @@ var Game =
 	    				if (!(typeof invulnEvent === "undefined"))
 	    						game.time.events.remove(invulnEvent);
 	    				invuln.alpha=0.8;
-	    				hurtTime = game.time.now + 9000;
-	    				invulnEvent = game.time.events.add(9000, function(){invuln.alpha = 0;lives++;that.killFunct();});
+	    				hurtTime = game.time.now + 6000;
+	    				invulnEvent = game.time.events.add(6000, function(){invuln.alpha = 0;lives++;that.killFunct();});
 	    				break;
-	    	case 1: 	console.log("hi"); break;
+	    	case 1: 	console.log("bomb"); 
+	    				that.bombPickup(player.body.x, player.body.y);
+	    				break;
 	    	case 2: 	console.log("no"); break;
 	    	default: 	console.log("I don't know what you just picked up"); break;
 	    }
 	},
-	makeDrops: function(x, y)
+	makeDrops: function(x, y, type)
 	{
 		drop = drops.getFirstExists(false);
        	if (drop)
@@ -351,8 +369,8 @@ var Game =
        		//var item = 0;
        		drop.dropType = item;
        		switch(item){
-       			case 0: drop.loadTexture("wat");break;
-       			case 1: drop.loadTexture("hi");break;
+       			case 0: drop.loadTexture("shield");break;
+       			case 1: drop.loadTexture("bomb");break;
        			case 2: drop.loadTexture("no");break;
        		}
        		var xmult = 1;
@@ -364,9 +382,28 @@ var Game =
             drop.body.velocity.y = 70*ymult;
             drop.body.velocity.x = 70*xmult;
             drop.body.bounce.set(1.3);
-            game.time.events.add(4500, function(){drop.body.collideWorldBounds = false});
+            drop.timer = game.time.events.add(4500, 
+            	function(){drop.body.collideWorldBounds = false;});
         }
 	},
+	bombPickup: function(x, y)
+	{
+		//var bigboom = game.add.sprite(x, y, 'bombboom');
+		var boom = bigboom.getFirstExists(false);
+    	boom.reset(x+5, y+5);
+		var boomtime = 1500;
+		boom.scale.setTo(0.2);
+		boom.anchor.setTo(0.5);
+		//boom.alpha = 1;
+		game.add.tween(boom.scale).to( { x: 30,y:30 }, boomtime, Phaser.Easing.Linear.None, true);
+		//game.add.tween(bigboom).to( { alpha:0 }, boomtime, Phaser.Easing.Linear.None, true);
+		game.time.events.add(boomtime, function(){boom.kill()});
+		spawnTime = game.time.now + 3000;
+	},
+	enemyBombed: function(boom, enemy) 
+	{
+    	that.victimDies(enemy, 50);
+    },
 	enemyHpReset: function(enemy){
 	    if(enemy.key == "meteors") enemy.hp = enemyToughness+1;
     	else enemy.hp = enemyToughness;

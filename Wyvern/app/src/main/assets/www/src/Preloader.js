@@ -17,6 +17,11 @@ var Preloader = {
 		game.load.image('hi', 'img/hi.png');
 		game.load.image('no', 'img/no.png');
 		game.load.image('wat', 'img/what.png');
+
+		game.load.image('shield', 'img/shield36x36-2.png');
+		game.load.image('bomb', 'img/bomb36x36.png');
+		game.load.image('bombboom', 'img/redring.png');
+
 		game.load.image('invuln', 'img/invuln2.png');
 		//game.load.image('enemy', 'img/bat.png');
 		game.load.image('bullet', 'img/bullet.png');
@@ -35,7 +40,7 @@ var Preloader = {
 
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
 		game.load.audio('cosmosBGM', 'sfx/Metal slug 3-into the cosmos soundtrack.mp3');
-		
+
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 		game.load.image('pauseBtn', 'img/pause.png');
 		//game.load.spritesheet('button-start', 'img/button-start.png', 146, 51);
@@ -44,7 +49,8 @@ var Preloader = {
 	create: function()
 	{
 		//loads right into the game because I'm tired of clicking the menu away
-		game.state.start("Hub");
+		game.state.start("Game");
+		//game.state.start("Hub");
 		//game.state.start("MainMenu");
 	}
 }
