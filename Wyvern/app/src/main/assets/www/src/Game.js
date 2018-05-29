@@ -39,9 +39,9 @@ var Game =
 
 		//background music
 		//comment out the music for testing if you want
-		// bgm = game.add.audio('cosmosBGM');
-		// bgm.play();
-		// bgm.volume = 0.2;
+		//volume is 0.2, loop is true
+		bgm = game.add.audio('cosmosBGM', 0.2, true);
+		bgm.play();
 
 		//background
 		back = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
@@ -246,6 +246,7 @@ var Game =
 			var yspeed = game.rnd.integerInRange(50, 150)*mult;
 			var xaccel = game.rnd.integerInRange(0, 80)*mult*-1;
 			var yaccel = game.rnd.integerInRange(0, 80)*mult*-1;
+			if (Math.random() > 0.9){yspeed = 0; xaccel = 0; yaccel = 0;}
 			for(var i=0; i<5; i++){
 	    			game.time.events.add(150*i, function(){that.spawnEnemy("eyes",x, y, xspeed, yspeed, xaccel, yaccel)});
 		}
@@ -320,7 +321,7 @@ var Game =
 	    {
 	    	that.victimDies(victim, victim.worth);
 	    	enemiesKilled += victim.worth/100;
-		    if(enemiesKilled%10==0)
+		    if(enemiesKilled%20==0)
 		    {
 		    	lives++;
 		    }
@@ -390,10 +391,11 @@ var Game =
 	{
 		//var bigboom = game.add.sprite(x, y, 'bombboom');
 		var boom = bigboom.getFirstExists(false);
-    	boom.reset(x+5, y+5);
-		var boomtime = 1500;
 		boom.scale.setTo(0.2);
 		boom.anchor.setTo(0.5);
+    	boom.reset(x+5, y+5);
+		var boomtime = 1000;
+
 		//boom.alpha = 1;
 		game.add.tween(boom.scale).to( { x: 30,y:30 }, boomtime, Phaser.Easing.Linear.None, true);
 		//game.add.tween(bigboom).to( { alpha:0 }, boomtime, Phaser.Easing.Linear.None, true);

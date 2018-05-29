@@ -18,5 +18,8 @@ var Hub =
 								140, 30, function(){game.state.start('Game')});
 		Level3 = createButton("Level 3", 10, game.world.width*0.4, game.world.height*0.7, 
 								140, 30, function(){game.state.start('Game')});
+
+		returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
+						160, 30, function(){game.state.start('MainMenu')});
 	}
 }
