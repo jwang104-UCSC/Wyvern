@@ -351,6 +351,8 @@ var Game =
 	    				if (!(typeof invulnEvent === "undefined"))
 	    						game.time.events.remove(invulnEvent);
 	    				invuln.alpha=0.8;
+	    				invuln.scale.setTo(0);
+	    				game.add.tween(invuln.scale).to( {x:1.25, y:1.25}, 150, Phaser.Easing.Linear.None, true);
 	    				hurtTime = game.time.now + 6000;
 	    				invulnEvent = game.time.events.add(6000, function(){invuln.alpha = 0;lives++;that.killFunct();});
 	    				break;
