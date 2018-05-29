@@ -1,4 +1,4 @@
-var Boot = 
+ var Boot = 
 {
 	preload: function()
 	{
