@@ -433,9 +433,10 @@ var Game =
 		endScore.anchor.setTo(0.5);
 		highscoreText.anchor.setTo(0.5);
 
-		retryButton = createButton("Retry", 15, game.world.width*0.5, game.world.height*0.7,
+		game.sound.stopAll();
+		retryButton = createButton("Retry", 10, game.world.width*0.5, game.world.height*0.7,
 						 100, 30, function(){game.state.restart(); game.paused = false;});
-		exitButton  = createButton("Main Menu", 15, game.world.width*0.5, game.world.height*0.8,
+		exitButton  = createButton("Main Menu", 10, game.world.width*0.5, game.world.height*0.8,
 						 175, 30, function(){game.state.start('MainMenu'); game.paused = false;});
 		//game.paused = true;
 		//lives = 5;
@@ -457,7 +458,7 @@ var Game =
 			resumeBtn = createButton("Resume",10,game.world.width*0.5, game.world.height*0.6,
 							 100, 30, that.pauseMenu);
 			restartBtn = createButton("Restart",10,game.world.width*0.5, game.world.height*0.7,
-							 100, 30, function(){game.state.restart(); game.paused = false;});
+							 100, 30, function(){game.state.restart(); game.sound.stopAll(); game.paused = false;});
 			menuBtn = createButton("Menu",10,game.world.width*0.5, game.world.height*0.8,
 							 100, 30, function(){game.state.start('MainMenu'); game.paused = false;});
 
