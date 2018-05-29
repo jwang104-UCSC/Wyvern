@@ -31,6 +31,7 @@ var Game =
 		firingTime = 0;
 		canShoot = true;
 		hurtTime = 0;
+		timepaused = false;
 
 		enemyToughness = 2;
 		enemiesKilled = 0;
@@ -41,6 +42,7 @@ var Game =
 		//comment out the music for testing if you want
 		//volume is 0.2, loop is true
 		bgm = game.add.audio('cosmosBGM', 0.2, true);
+		warudo = game.add.audio('warudoSFX');
 		bgm.play();
 
 		//background
@@ -186,7 +188,8 @@ var Game =
 	    //shooting toggle AKA debug button make it do whatever you want for testing
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
 	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
-	    	function(){that.bombPickup(hitbox.body.x, hitbox.body.y)});
+	    	//function(){that.bombPickup(hitbox.body.x, hitbox.body.y)});
+	    	function(){that.zaWarudo()});
 	    	//function(){that.makeDrops(50, 50)});
 	    	//function(){explodeFunct(game.world.width*0.5, 150);});
 	    	//function(){sprite.alpha = 1;});
@@ -208,7 +211,7 @@ var Game =
 
 	update: function() 
 	{
-	    back.tilePosition.y += 2;
+	    if (!timepaused)back.tilePosition.y += 2;
 		if (game.time.now > spawnTime) this.makeEnemy();
 		this.fireBullet();
 
@@ -252,9 +255,41 @@ var Game =
 		}
 		}
 	},
+	zaWarudo: function(){
+		console.log("za warudo");
+		timepaused = true;
+		bgm.pause();
+		warudo.play();
+		var x = hitbox.body.x;
+		var y = hitbox.body.y;
+		var ring = game.add.sprite(x, y, 'bombboom');
+		ring.scale.setTo(0.2);
+		ring.anchor.setTo(0.5);
+		var boomtime = 700;
 
+		//boom.alpha = 1;
+		var expand = game.add.tween(ring.scale).to( { x: 30,y:30 }, boomtime, Phaser.Easing.Linear.None, true);
+		game.time.events.add(boomtime, 
+			function(){
+				game.add.tween(ring.scale).to( { x: 0,y:0 }, boomtime, Phaser.Easing.Linear.None, true);
+			});
+		//game.add.tween(bigboom).to( { alpha:0 }, boomtime, Phaser.Easing.Linear.None, true);
+		game.time.events.add(3*boomtime, function(){ring.kill()});
+		spawnTime = game.time.now + 999999;
+		bullets.forEachAlive(function(enemy){enemy.body.stop()});
+		eyes.forEachAlive(function(enemy){that.enemyFreeze(enemy)});
+		meteors.forEachAlive(function(enemy){that.enemyFreeze(enemy);});
+
+	},
+	enemyFreeze: function(enemy){
+		enemy.body.stop();
+		enemy.animations.stop();
+		enemy.body.gravity.x = 0;
+        enemy.body.gravity.y = 0;
+	},
 	spawnEnemy: function(name, x, y, xspeed, yspeed,xaccel, yaccel)
 	{
+        if(!timepaused){
         switch(name){
         	case "eyes":
        			var enemy = eyes.getFirstExists(false);
@@ -275,6 +310,7 @@ var Game =
             enemy.body.gravity.y = yaccel;
             spawnTime = game.time.now + spawnDelay;
         }
+    }
 	},
 	
 	enemyOffScreen: function(bar, enemy)
@@ -300,7 +336,8 @@ var Game =
                     var k = Math.floor(shotSpread/2); 
                     var angle = k*spreadAngle - i*spreadAngle;
                     game.physics.arcade.velocityFromAngle(angle - 90, 40*shotSpread + 10, bullet.body.velocity);
-                    bullet.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;
+                    if (!timepaused) bullet.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;
+                    else bullet.body.velocity.y = 0;
                 }
             }
         	bulletTime = game.time.now + shootDelay;
