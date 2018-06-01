@@ -41,6 +41,8 @@ var Preloader = {
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
 		game.load.audio('cosmosBGM', 'sfx/Metal slug 3-into the cosmos soundtrack.mp3');
 		game.load.audio('warudoSFX', 'sfx/Za Warudo.mp3');
+		game.load.audio('warudoEndSFX', 'sfx/Warudo End.ogg');
+		
 
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 		game.load.image('pauseBtn', 'img/pause.png');

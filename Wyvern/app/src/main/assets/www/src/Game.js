@@ -1,9 +1,13 @@
 var Game = 
 {
 	create: function() {
+		game.stage.smoothed = false;
+		
+		game.time.advancedTiming = true;
 		that = this;
 		verbose = false;
 		//Setup gameplay variables here
+		timepaused = false;
 		shootRateMultiplier = 1;
 		baseShotSpeed = -200;
 		shotSpeedMultiplier = 1;
@@ -31,7 +35,7 @@ var Game =
 		firingTime = 0;
 		canShoot = true;
 		hurtTime = 0;
-		timepaused = false;
+		
 
 		enemyToughness = 2;
 		enemiesKilled = 0;
@@ -42,9 +46,9 @@ var Game =
 		//comment out the music for testing if you want
 		//volume is 0.2, loop is true
 		bgm = game.add.audio('cosmosBGM', 0.2, true);
-		warudo = game.add.audio('warudoSFX');
+		warudo = game.add.audio('warudoSFX', 0.7);
+		warudoEnd = game.add.audio('warudoEndSFX', 1);
 		bgm.play();
-
 		//background
 		back = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
 		back.tint = 0x808080;
@@ -53,7 +57,7 @@ var Game =
 	    bullets.enableBody = true;
 	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 1000; i++)
+	    for (var i = 0; i < 5000; i++)
 	    { 
 	        var b = bullets.create(0, 0, 'fireball');
 	        b.scale.setTo(0.01);
@@ -63,6 +67,7 @@ var Game =
 	        b.visible = false;
 	        b.checkWorldBounds = true;
 	        b.events.onOutOfBounds.add(resetFunct, this);
+	        b.tween = null;
 	    }
 
 		//makes drops
@@ -82,8 +87,9 @@ var Game =
 	        d.checkWorldBounds = true;
 	        d.body.collideWorldBounds = true;
 	        d.events.onOutOfBounds.add(resetFunct, this);
-	        d.body.maxVelocity.setTo(300);
+	        d.body.maxVelocity.setTo(150);
 	        d.timer = null;
+	        d.warudo = null;
 	    }
 
 		//makes enemies
@@ -233,6 +239,10 @@ var Game =
 	    game.physics.arcade.overlap(bigboom, eyes, this.enemyBombed);
 	},
 
+	render: function() 
+	{
+		game.debug.text(game.time.fps || '--', 2, 14, "#00ff00"); 
+	},
 	makeEnemy: function() 
 	{	
 		if (Math.random() > 0.2){
@@ -256,36 +266,72 @@ var Game =
 		}
 	},
 	zaWarudo: function(){
+		var x = hitbox.body.x;
+		var y = hitbox.body.y;
+		if (timepaused){
+			warudoEnd.play();
+			var ring = game.add.sprite(x+5, y+5, 'bombboom');
+			ring.scale.setTo(30);
+			ring.anchor.setTo(0.5);
+			var zoom = game.add.tween(ring.scale).to( { x: 0,y:0 }, 1000, Phaser.Easing.Linear.None, true);
+			game.add.tween(back).to( { tint: 0x808080}, 1000, Phaser.Easing.Linear.None, true);
+			zoom.onComplete.add(blah, this);
+			function blah(){
+				bgm.resume();
+				timepaused = false;
+				meteors.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
+		    	eyes.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
+		    	drops.forEachAlive(function(drops){
+					drops.body.velocity.x = drops.warudo[0];
+		    		drops.body.velocity.y = drops.warudo[1];
+		    		drops.tint = 0xffffff;
+		    	});
+				bullets.forEachAlive(function(bullets){bullets.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;});
+				spawnTime = game.time.now+3000;
+			}
+			
+		}
+		else{
 		console.log("za warudo");
 		timepaused = true;
 		bgm.pause();
 		warudo.play();
-		var x = hitbox.body.x;
-		var y = hitbox.body.y;
-		var ring = game.add.sprite(x, y, 'bombboom');
+		var ring = game.add.sprite(x+5, y+5, 'bombboom');
 		ring.scale.setTo(0.2);
 		ring.anchor.setTo(0.5);
 		var boomtime = 700;
 
-		//boom.alpha = 1;
-		var expand = game.add.tween(ring.scale).to( { x: 30,y:30 }, boomtime, Phaser.Easing.Linear.None, true);
-		game.time.events.add(boomtime, 
-			function(){
-				game.add.tween(ring.scale).to( { x: 0,y:0 }, boomtime, Phaser.Easing.Linear.None, true);
-			});
-		//game.add.tween(bigboom).to( { alpha:0 }, boomtime, Phaser.Easing.Linear.None, true);
+		game.add.tween(ring.scale).to( { x: 30,y:30 }, boomtime, Phaser.Easing.Linear.None, true);
+		game.add.tween(back).to( { tint:0x333333 }, boomtime*2, Phaser.Easing.Linear.None, true);
+		// game.time.events.add(boomtime, 
+		// 	function(){
+		// 		game.add.tween(ring.scale).to( { x: 0,y:0 }, boomtime, Phaser.Easing.Linear.None, true);
+		// 	});
 		game.time.events.add(3*boomtime, function(){ring.kill()});
 		spawnTime = game.time.now + 999999;
-		bullets.forEachAlive(function(enemy){enemy.body.stop()});
+		bullets.forEachAlive(function(bullets){game.add.tween(bullets.body.velocity).to( { y:0 }, 1000, Phaser.Easing.Quadratic.Out, true);});
+		drops.forEachAlive(function(drops){that.enemyFreeze(drops)});
 		eyes.forEachAlive(function(enemy){that.enemyFreeze(enemy)});
 		meteors.forEachAlive(function(enemy){that.enemyFreeze(enemy);});
-
+		}
 	},
 	enemyFreeze: function(enemy){
-		enemy.body.stop();
+		enemy.tint = 0xafb3cf;
+		enemy.warudo ={"0":enemy.body.velocity.x,"1":enemy.body.velocity.y,
+						"2":enemy.body.gravity.x, "3":enemy.body.gravity.y};
+		game.add.tween(enemy.body.velocity).to( { x:0, y:0 }, 1250, Phaser.Easing.Quadratic.Out, true);
 		enemy.animations.stop();
 		enemy.body.gravity.x = 0;
         enemy.body.gravity.y = 0;
+	},
+	enemyUnfreeze: function(enemy){
+		enemy.tint = 0xffffff;
+		enemy.body.velocity.x = enemy.warudo[0];
+		enemy.body.velocity.y = enemy.warudo[1];
+		enemy.body.gravity.x = enemy.warudo[2];
+		enemy.body.gravity.y = enemy.warudo[3];
+		enemy.play('fly');
+		that.victimCheck(enemy);
 	},
 	spawnEnemy: function(name, x, y, xspeed, yspeed,xaccel, yaccel)
 	{
@@ -303,6 +349,8 @@ var Game =
         {
         	if(xaccel == null) xaccel = 0;
         	if(yaccel == null) yaccel = 0;
+        	//flip horizontally
+        	if(x<game.world.centerX)enemy.scale.x *=-1;
             enemy.reset(x, y);
             enemy.body.velocity.x = xspeed;
             enemy.body.velocity.y = yspeed;
@@ -315,8 +363,7 @@ var Game =
 	
 	enemyOffScreen: function(bar, enemy)
 	{
-		that.enemyHpReset(enemy);
-		resetFunct(enemy);
+		that.enemyReset(enemy);
 	},
 
 	fireBullet: function() 
@@ -330,14 +377,17 @@ var Game =
                 var bullet = bullets.getFirstExists(false);
                 if (bullet) 
                 {
-                    bullet.reset(sprite.x, sprite.y - 17);
+                    bullet.reset(sprite.x, sprite.y - 25);
                     var spreadAngle = 90/shotSpread;
                     //decide how many bullets to shoot on each side
                     var k = Math.floor(shotSpread/2); 
                     var angle = k*spreadAngle - i*spreadAngle;
                     game.physics.arcade.velocityFromAngle(angle - 90, 40*shotSpread + 10, bullet.body.velocity);
-                    if (!timepaused) bullet.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;
-                    else bullet.body.velocity.y = 0;
+                    bullet.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;
+                    if (timepaused){
+                    	var tween = game.add.tween(bullet.body.velocity).to( { y:0 }, 1000, Phaser.Easing.Quadratic.Out, true);
+                    	bullet.tween = tween;
+                    }
                 }
             }
         	bulletTime = game.time.now + shootDelay;
@@ -354,6 +404,10 @@ var Game =
 	    //change tint back after delay in millisecond
 	    game.time.events.add(20, function(){victim.tint = 0xFFFFFF});
 	    //check if victim dies
+	    if(!timepaused)that.victimCheck(victim);
+	    
+	},
+	victimCheck: function(victim){
 	    if(victim.hp <= 0)
 	    {
 	    	that.victimDies(victim, victim.worth);
@@ -371,15 +425,16 @@ var Game =
 	victimDies: function(victim, scoreGain){
 		    resetFunct(victim);
 		    //reset hp
-		    that.enemyHpReset(victim);
+		    that.enemyReset(victim);
 		    //Increase the score
 		    score += scoreGain;
 		    if(scoreGain != 0) textPop(scoreGain.toString(), victim.body.x, victim.body.y);
 		    explodeFunct(victim.body.x, victim.body.y);
 	},
 	itemPickup: function(player, drop) {
-        if (!(typeof drop.timer === "undefined"))
-					game.time.events.remove(drop.timer);
+        if (!(typeof drop.timer === "undefined")){
+        			console.log("what");
+					game.time.events.remove(drop.timer);}
 	    resetFunct(drop);
 	    //applies buff
 	    //if you come up with more buff ideas, simply add another case
@@ -405,7 +460,9 @@ var Game =
 		drop = drops.getFirstExists(false);
        	if (drop)
        	{	
-       		var item = game.rnd.integerInRange(0, 2);
+       		var item;
+       		if(type != null && type <3) item = type
+       		else item = game.rnd.integerInRange(0, 2);
        		//var item = 0;
        		drop.dropType = item;
        		switch(item){
@@ -417,13 +474,15 @@ var Game =
        		var ymult = 1;
             drop.reset(x, y);
             drop.body.collideWorldBounds = true;
+            drop.body.bounce.set(1.3);
             if (Math.random() > 0.5) ymult = -1;
             if (Math.random() > 0.5) xmult = -1;
+            if(!timepaused){
             drop.body.velocity.y = 70*ymult;
             drop.body.velocity.x = 70*xmult;
-            drop.body.bounce.set(1.3);
             drop.timer = game.time.events.add(4500, 
             	function(){drop.body.collideWorldBounds = false;});
+        	}
         }
 	},
 	bombPickup: function(x, y)
@@ -445,14 +504,20 @@ var Game =
 	{
     	that.victimDies(enemy, 50);
     },
-	enemyHpReset: function(enemy){
+	enemyReset: function(enemy){
 	    if(enemy.key == "meteors") enemy.hp = enemyToughness+1;
     	else enemy.hp = enemyToughness;
+		if(enemy.scale.x <0) enemy.scale.x *=-1;
+		enemy.tint = 0xffffff;
+		enemy.play("fly");
+    	resetFunct(enemy);
 	},
 	enemyTouched: function(player, enemy) 
 	{
-    	that.killFunct();
-    	enemy.kill();
+    	if(!timepaused){
+    		that.killFunct();
+    		that.enemyReset(enemy);
+    	}
     },
 
 	killFunct: function()
