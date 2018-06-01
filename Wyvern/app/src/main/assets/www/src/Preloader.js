@@ -14,12 +14,14 @@ var Preloader = {
 		game.load.image('redsky', 'img/redskyloop.png');
 		game.load.image('pauseScreen', 'img/pause-screen.png');
 
-		game.load.image('hi', 'img/hi.png');
-		game.load.image('no', 'img/no.png');
-		game.load.image('wat', 'img/what.png');
+		// game.load.image('hi', 'img/hi.png');
+		// game.load.image('no', 'img/no.png');
+		// game.load.image('wat', 'img/what.png');
 
 		game.load.image('shield', 'img/shield36x36-2.png');
 		game.load.image('bomb', 'img/bomb36x36.png');
+		game.load.image('watch', 'img/watch36x36.png');
+		
 		game.load.image('bombboom', 'img/redring.png');
 
 		game.load.image('invuln', 'img/invuln2.png');
@@ -39,7 +41,11 @@ var Preloader = {
 
 
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
-		game.load.audio('cosmosBGM', 'sfx/Metal slug 3-into the cosmos soundtrack.mp3');
+		game.load.audio('cosmosBGM', 'sfx/Metal Slug 3 - Into the Cosmos.ogg');
+		game.load.audio('warudoSFX', 'sfx/Za Warudo.mp3');
+		game.load.audio('warudoEndSFX', 'sfx/Warudo End.ogg');
+		game.load.audio('clockTick', 'sfx/clockTick.ogg');
+		
 
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 		game.load.image('pauseBtn', 'img/pause.png');
@@ -48,6 +54,7 @@ var Preloader = {
 	},
 	create: function()
 	{
+		game.add.plugin(PhaserInput.Plugin);
 		//loads right into the game because I'm tired of clicking the menu away
 		game.state.start("Game");
 		//game.state.start("Hub");
