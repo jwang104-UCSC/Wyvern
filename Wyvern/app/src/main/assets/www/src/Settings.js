@@ -20,7 +20,7 @@ var Settings =
 								200, 30, function(){Cookies.remove("seed")});
 		scoreReset   = createButton("Reset Highscore", 10, game.world.width*0.5, game.world.height*0.6, 
 								200, 30, function(){Cookies.remove("highscore")});
-		muteButton   = createButton("Mute Sound", 10, game.world.width*0.5, game.world.height*0.7, 
+		muteButton   = createButton("Toggle Mute", 10, game.world.width*0.5, game.world.height*0.7, 
 								140, 30, function(){soundControl()});
 		returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.95, 
 								160, 30, function(){game.state.start('MainMenu')});

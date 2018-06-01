@@ -94,7 +94,6 @@ var Game =
 	        d.events.onOutOfBounds.add(resetFunct, this);
 	        d.body.maxVelocity.setTo(150);
 	        d.timer = null;
-	        d.warudo = null;
 	    }
 
 		//makes enemies
@@ -200,7 +199,7 @@ var Game =
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
 	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
 	    	//function(){that.bombPickup(hitbox.body.x, hitbox.body.y)});
-	    	function(){that.pauseTime()});
+	    	function(){that.makeDrops(100, 100, 2)});
 	    	//function(){that.makeDrops(50, 50)});
 	    	//function(){explodeFunct(game.world.width*0.5, 150);});
 	    	//function(){sprite.alpha = 1;});
@@ -295,11 +294,15 @@ var Game =
 				meteors.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
 		    	eyes.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
 		    	drops.forEachAlive(function(drops){
-		    		if(drops){
-					drops.body.velocity.x = drops.warudo[0];
-		    		drops.body.velocity.y = drops.warudo[1];
-		    		drops.tint = 0xffffff;
-		    		}
+		    		if(drops.warudo){
+		    		if(drops.warudo[0] != 0){
+						drops.body.velocity.x = drops.warudo[0];
+			    		drops.body.velocity.y = drops.warudo[1];
+			    		drops.tint = 0xffffff;
+		    		}}
+		    		if(!drops.warudo){
+			            drops.body.velocity.y = 100;
+			        }
 		    	});
 		    	canShoot = true;
 				bullets.forEachAlive(function(bullets){bullets.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;});
@@ -511,8 +514,10 @@ var Game =
             if(!timepaused){
             drop.body.velocity.y = 70*ymult;
             drop.body.velocity.x = 70*xmult;
-            drop.timer = game.time.events.add(4500, 
-            	function(){drop.body.collideWorldBounds = false;});
+            drop.timer = game.time.events.add(4500, function(){stopCollide(drop)}, this);
+	            function stopCollide(drop){
+	            	drop.body.collideWorldBounds = false;
+	            }
         	}
         }
 	},

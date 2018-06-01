@@ -56,7 +56,7 @@ var Preloader = {
 	{
 		game.add.plugin(PhaserInput.Plugin);
 		//loads right into the game because I'm tired of clicking the menu away
-		game.state.start("Settings");
+		game.state.start("Game");
 		//game.state.start("Hub");
 		//game.state.start("MainMenu");
 	}
