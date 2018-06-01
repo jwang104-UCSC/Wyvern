@@ -2,7 +2,7 @@ var MainMenu =
 {
 	create: function() 
 	{
-		game.sound.stopAll();
+		//game.sound.stopAll();
 		game.add.sprite(-100, -240, 'mainMenu-bg');
 
 		//Add custom font for title text

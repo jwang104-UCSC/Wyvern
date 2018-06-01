@@ -1,12 +1,17 @@
 var Game = 
 {
 	create: function() {
+		var seed = parseInt(Cookies.get("seed"));
+		if (typeof Cookies.get("seed") != 'undefined')
+			 Math.seedrandom(seed);
+		else Math.seedrandom();
 		game.stage.smoothed = false;
 		game.time.advancedTiming = true;
 		that = this;
 		verbose = false;
 		//Setup gameplay variables here
 		timepaused = false;
+		pauseLength = 4;
 		shootRateMultiplier = 1;
 		baseShotSpeed = -200;
 		shotSpeedMultiplier = 1;
@@ -47,6 +52,7 @@ var Game =
 		bgm = game.add.audio('cosmosBGM', 0.2, true);
 		warudo = game.add.audio('warudoSFX', 0.7);
 		warudoEnd = game.add.audio('warudoEndSFX', 1);
+		clockTick = game.add.audio('clockTick', 0.3, true);
 		bgm.play();
 		//background
 		back = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
@@ -56,7 +62,7 @@ var Game =
 	    bullets.enableBody = true;
 	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-	    for (var i = 0; i < 5000; i++)
+	    for (var i = 0; i < 1000; i++)
 	    { 
 	        var b = bullets.create(0, 0, 'fireball');
 	        b.scale.setTo(0.01);
@@ -194,7 +200,7 @@ var Game =
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
 	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
 	    	//function(){that.bombPickup(hitbox.body.x, hitbox.body.y)});
-	    	function(){that.zaWarudo()});
+	    	function(){that.pauseTime()});
 	    	//function(){that.makeDrops(50, 50)});
 	    	//function(){explodeFunct(game.world.width*0.5, 150);});
 	    	//function(){sprite.alpha = 1;});
@@ -245,46 +251,55 @@ var Game =
 	makeEnemy: function() 
 	{	
 		if (Math.random() > 0.2){
-		var x = game.rnd.integerInRange(0, game.world.width);
-		var xspeed = game.rnd.integerInRange(-40, 40);
-		var yspeed = game.rnd.integerInRange(150, 250);
+		var x = randomIntFromInterval(0, game.world.width);
+		var xspeed = randomIntFromInterval(-40, 40);
+		var yspeed = randomIntFromInterval(150, 250);
 		this.spawnEnemy("meteors",x, -10, xspeed, yspeed);
 		}else{
 			var mult = 1;
 			if(Math.random()>0.5){var x = -10;}
 			else {mult = -1; var x = game.world.width+10;}
-			var y = game.rnd.integerInRange(0, game.world.height-60);
-			var xspeed = game.rnd.integerInRange(75, 200)*mult;
-			var yspeed = game.rnd.integerInRange(50, 150)*mult;
-			var xaccel = game.rnd.integerInRange(0, 80)*mult*-1;
-			var yaccel = game.rnd.integerInRange(0, 80)*mult*-1;
+			var y = randomIntFromInterval(0, game.world.height-60);
+			var xspeed = randomIntFromInterval(75, 200)*mult;
+			var yspeed = randomIntFromInterval(50, 150)*mult;
+			if(Math.random()>0.5) yspeed *=-1;
+			var xaccel = randomIntFromInterval(0, 80)*mult;
+			if(Math.random()>0.5) xaccel *=-1;
+			var yaccel = randomIntFromInterval(0, 80)*mult;
+			if(Math.random()>0.5) yaccel *=-1;
 			if (Math.random() > 0.9){yspeed = 0; xaccel = 0; yaccel = 0;}
 			for(var i=0; i<5; i++){
 	    			game.time.events.add(150*i, function(){that.spawnEnemy("eyes",x, y, xspeed, yspeed, xaccel, yaccel)});
 		}
 		}
 	},
-	zaWarudo: function(){
+	pauseTime: function(){
 		var x = hitbox.body.x;
 		var y = hitbox.body.y;
 		if (timepaused){
+			game.time.events.remove(resumeTime);
+			clockTick.stop();
 			canShoot = false;
 			warudoEnd.play();
-			var ring = game.add.sprite(x+5, y+5, 'bombboom');
-			ring.scale.setTo(30);
-			ring.anchor.setTo(0.5);
-			var zoom = game.add.tween(ring.scale).to( { x: 0,y:0 }, 1000, Phaser.Easing.Linear.None, true);
+			// var ring = bigboom.getFirstExists(false);
+			// ring.scale.setTo(30);
+			// ring.anchor.setTo(0.5);
+			// ring.reset(x+5, y+5);
+			// var zoom = game.add.tween(ring.scale).to( { x: 0,y:0 }, 1000, Phaser.Easing.Linear.None, true);
 			game.add.tween(back).to( { tint: 0x808080}, 1000, Phaser.Easing.Linear.None, true);
-			zoom.onComplete.add(blah, this);
-			function blah(){
+			//zoom.onComplete.add(blah, this);
+			game.time.events.add(1250, unpause, this);
+			function unpause(){
 				bgm.resume();
 				timepaused = false;
 				meteors.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
 		    	eyes.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
 		    	drops.forEachAlive(function(drops){
+		    		if(drops){
 					drops.body.velocity.x = drops.warudo[0];
 		    		drops.body.velocity.y = drops.warudo[1];
 		    		drops.tint = 0xffffff;
+		    		}
 		    	});
 		    	canShoot = true;
 				bullets.forEachAlive(function(bullets){bullets.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;});
@@ -293,27 +308,31 @@ var Game =
 			
 		}
 		else{
-		console.log("za warudo");
-		timepaused = true;
-		bgm.pause();
-		warudo.play();
-		var ring = game.add.sprite(x+5, y+5, 'bombboom');
-		ring.scale.setTo(0.2);
-		ring.anchor.setTo(0.5);
-		var boomtime = 700;
+			timepaused = true;
+			bgm.pause();
+			warudo.play();
+			var ring = bigboom.getFirstExists(false);
+			ring.scale.setTo(0.2);
+			ring.anchor.setTo(0.5);
+			ring.reset(x+5, y+5);
+			var boomtime = 700;
 
-		game.add.tween(ring.scale).to( { x: 30,y:30 }, boomtime, Phaser.Easing.Linear.None, true);
-		game.add.tween(back).to( { tint:0x333333 }, boomtime*2, Phaser.Easing.Linear.None, true);
-		// game.time.events.add(boomtime, 
-		// 	function(){
-		// 		game.add.tween(ring.scale).to( { x: 0,y:0 }, boomtime, Phaser.Easing.Linear.None, true);
-		// 	});
-		game.time.events.add(3*boomtime, function(){ring.kill()});
-		spawnTime = game.time.now + 999999;
-		bullets.forEachAlive(function(bullets){game.add.tween(bullets.body.velocity).to( { y:0 }, 1000, Phaser.Easing.Quadratic.Out, true);});
-		drops.forEachAlive(function(drops){that.enemyFreeze(drops)});
-		eyes.forEachAlive(function(enemy){that.enemyFreeze(enemy)});
-		meteors.forEachAlive(function(enemy){that.enemyFreeze(enemy);});
+			game.add.tween(ring.scale).to( { x: 30,y:30 }, boomtime, Phaser.Easing.Linear.None, true);
+			game.add.tween(back).to( { tint:0x333333 }, boomtime*2, Phaser.Easing.Linear.None, true);
+			game.time.events.add(boomtime, 
+				function(){
+					game.add.tween(ring.scale).to( { x: 0,y:0 }, boomtime, Phaser.Easing.Linear.None, true);
+				});
+			game.time.events.add(100+3*boomtime, function(){
+				ring.kill();
+				clockTick.play();
+				resumeTime = game.time.events.add(pauseLength*1000, that.pauseTime, this);
+			});
+			spawnTime = game.time.now + 999999;
+			bullets.forEachAlive(function(bullets){game.add.tween(bullets.body.velocity).to( { y:0 }, 1000, Phaser.Easing.Quadratic.Out, true);});
+			drops.forEachAlive(function(drops){that.enemyFreeze(drops)});
+			eyes.forEachAlive(function(enemy){that.enemyFreeze(enemy)});
+			meteors.forEachAlive(function(enemy){that.enemyFreeze(enemy);});
 		}
 	},
 	enemyFreeze: function(enemy){
@@ -419,8 +438,14 @@ var Game =
 		    }
 
 		    //rng to check if an item drops
-		     if (Math.random() < dropRate)
-	    	 	that.makeDrops(victim.body.x, victim.body.y);
+		     if (Math.random() < dropRate){
+		     	//if pass the check twice, drop the rarer timestop power
+		     	if (Math.random() < dropRate)
+		     		that.makeDrops(victim.body.x, victim.body.y, 2);
+		     	else that.makeDrops(victim.body.x, victim.body.y);
+		     }
+
+	    	 	
 		}
 	},
 	victimDies: function(victim, scoreGain){
@@ -433,27 +458,32 @@ var Game =
 		    explodeFunct(victim.body.x, victim.body.y);
 	},
 	itemPickup: function(player, drop) {
-        if (!(typeof drop.timer === "undefined")){
-        			console.log("what");
-					game.time.events.remove(drop.timer);}
+		if (!(typeof drop.timer === "undefined"))
+    						game.time.events.remove(drop.timer);
 	    resetFunct(drop);
 	    //applies buff
 	    //if you come up with more buff ideas, simply add another case
+    	//console.log(drop.key);
 	    switch(drop.dropType){
-	    	case 0: 	console.log("invuln");
-	    				if (!(typeof invulnEvent === "undefined"))
-	    						game.time.events.remove(invulnEvent);
-	    				invuln.alpha=0.8;
-	    				invuln.scale.setTo(0);
-	    				game.add.tween(invuln.scale).to( {x:1.25, y:1.25}, 150, Phaser.Easing.Linear.None, true);
-	    				hurtTime = game.time.now + 6000;
-	    				invulnEvent = game.time.events.add(6000, function(){invuln.alpha = 0;lives++;that.killFunct();});
-	    				break;
-	    	case 1: 	console.log("bomb"); 
-	    				that.bombPickup(player.body.x, player.body.y);
-	    				break;
-	    	case 2: 	console.log("no"); break;
-	    	default: 	console.log("I don't know what you just picked up"); break;
+	    	case 0: 	
+    				if (!(typeof invulnEvent === "undefined"))
+    						game.time.events.remove(invulnEvent);
+    				invuln.alpha=0.8;
+    				invuln.scale.setTo(0);
+    				game.add.tween(invuln.scale).to( {x:1.25, y:1.25}, 150, Phaser.Easing.Linear.None, true);
+    				hurtTime = game.time.now + 6000;
+    				invulnEvent = game.time.events.add(6000, function(){invuln.alpha = 0;lives++;that.killFunct();});
+    				break;
+	    	case 1: 	
+    				that.bombPickup(player.body.x, player.body.y);
+    				break;
+	    	case 2: 	
+    				drops.forEachAlive(function(drops){
+    					if (drops.key != "shield") drops.kill();
+			    	});
+			    	that.pauseTime();
+    				break;
+	    	default: console.log("I don't know what you just picked up"); break;
 	    }
 	},
 	makeDrops: function(x, y, type)
@@ -462,14 +492,14 @@ var Game =
        	if (drop)
        	{	
        		var item;
+       		//if asked to make a type beyond what we have, we default to rng
        		if(type != null && type <3) item = type
-       		else item = game.rnd.integerInRange(0, 2);
-       		//var item = 0;
+       		else item = randomIntFromInterval(0, 1);
        		drop.dropType = item;
        		switch(item){
        			case 0: drop.loadTexture("shield");break;
        			case 1: drop.loadTexture("bomb");break;
-       			case 2: drop.loadTexture("no");break;
+       			case 2: drop.loadTexture("watch");break;
        		}
        		var xmult = 1;
        		var ymult = 1;
@@ -499,11 +529,11 @@ var Game =
 		game.add.tween(boom.scale).to( { x: 30,y:30 }, boomtime, Phaser.Easing.Linear.None, true);
 		//game.add.tween(bigboom).to( { alpha:0 }, boomtime, Phaser.Easing.Linear.None, true);
 		game.time.events.add(boomtime, function(){boom.kill()});
-		spawnTime = game.time.now + 3000;
+		spawnTime = game.time.now + 2000;
 	},
 	enemyBombed: function(boom, enemy) 
 	{
-    	that.victimDies(enemy, 50);
+    	if (!timepaused)that.victimDies(enemy, 50);
     },
 	enemyReset: function(enemy){
 	    if(enemy.key == "meteors") enemy.hp = enemyToughness+1;
@@ -564,7 +594,6 @@ var Game =
 		var textFormat = {font:'16px Arial', fill:'#fff'};
 		var highscore = parseInt(Cookies.get("highscore"));
 		if (isNaN(highscore)) highscore = 0;
-		console.log("old highscore: " + highscore);
 
 		var endScore = game.add.text(game.world.width*0.5, game.world.height*0.5, "Final score: " + score, textFormat);
 		if(score>highscore){
@@ -581,7 +610,7 @@ var Game =
 		retryButton = createButton("Retry", 10, game.world.width*0.5, game.world.height*0.7,
 						 100, 30, function(){game.state.restart(); game.paused = false;});
 		exitButton  = createButton("Main Menu", 10, game.world.width*0.5, game.world.height*0.8,
-						 175, 30, function(){game.state.start('MainMenu'); game.paused = false;});
+						 175, 30, function(){game.state.start('MainMenu'); game.paused = false; bgm.stop();});
 		//game.paused = true;
 		//lives = 5;
 	},
@@ -604,7 +633,7 @@ var Game =
 			restartBtn = createButton("Restart",10,game.world.width*0.5, game.world.height*0.7,
 							 100, 30, function(){game.state.restart(); game.sound.stopAll(); game.paused = false;});
 			menuBtn = createButton("Menu",10,game.world.width*0.5, game.world.height*0.8,
-							 100, 30, function(){game.state.start('MainMenu'); game.paused = false;});
+							 100, 30, function(){game.state.start('MainMenu'); game.paused = false; bgm.stop();});
 
 		}
 	},
@@ -695,4 +724,9 @@ function textPop(string, x, y){
     	p.events.onOutOfBounds.add(resetFunct, this);
 	}
     return pop;
+}
+
+function randomIntFromInterval(min,max)
+{
+    return Math.floor(Math.random()*(max-min+1)+min);
 }

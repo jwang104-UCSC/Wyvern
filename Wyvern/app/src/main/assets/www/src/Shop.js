@@ -21,27 +21,25 @@ var Shop =
 
 	//Copy paste upgrade functions
 	livesPlus: function()
-	{
-		update = game.add.text(game.world.centerX, game.world.centerY*0.5,
-						"Lives Increased!", {font:"px Verdana", fill:"#0", align:"center"});
-		game.time.events.add(700, function(){game.add.tween(update).to({y: 0, alpha: 0}, 1000, Phaser.Easing.Linear.None, true)}, this);
+	{	
+		textRise("Lives Increased!", game.world.centerX, game.world.centerY*0.5);
 		tempLives = parseInt(Cookies.get("lives"));
 		Cookies.set('lives', tempLives++); //add lives to cookie
 	},
 
 	spreadPlus: function()
 	{
-		shotSpread++;
-		update2 = game.add.text(game.world.centerX, game.world.centerY*0.7,
-						"Spread Increased!", {font:"px Verdana", fill:"#0", align:"center"});
-		game.time.events.add(700, function(){game.add.tween(update2).to({y: 0, alpha: 0}, 1000, Phaser.Easing.Linear.None, true)}, this);
+		//shotSpread++;
+		textRise("Spread Increased!", game.world.centerX, game.world.centerY*0.7);
 	},
 
 	shieldPlus: function()
 	{
 		//shotSpread++;
-		update3 = game.add.text(game.world.centerX, game.world.centerY*0.9,
-						"Shield Power Increased!", {font:"px Verdana", fill:"#0", align:"center"});
-		game.time.events.add(700, function(){game.add.tween(update3).to({y: 0, alpha: 0}, 1000, Phaser.Easing.Linear.None, true)}, this);
+		textRise("Shield Power Increased!", game.world.centerX, game.world.centerY*0.9);
 	}
+}
+function textRise(string, x, y){
+	var rise = game.add.text(x, y, string, {font:"px Verdana", fill:"#0", align:"center"});
+	game.time.events.add(700, function(){game.add.tween(rise).to({y: 0, alpha: 0}, 1000, Phaser.Easing.Linear.None, true)}, this);
 }
