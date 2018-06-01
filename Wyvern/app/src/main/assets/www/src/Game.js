@@ -6,6 +6,7 @@ var Game =
 			 Math.seedrandom(seed);
 		else Math.seedrandom();
 		game.stage.smoothed = false;
+		game.stage.disableVisibilityChange = true;
 		game.time.advancedTiming = true;
 		that = this;
 		verbose = false;
@@ -183,7 +184,11 @@ var Game =
 
 		//These coord offsets are probably all wrong once we get real sprites
 		//UI
-
+		runTimerStart = new Date();
+		runTimerString = "00:00.00";
+		runTimer = game.add.text(game.world.width, game.world.height - 25, runTimerString, 
+					{font:'16px Arial', fill:'#fff', align:"right"});
+		runTimer.anchor.setTo(1, 0);
 		scoreString = 'Score: ';
 		scoreText = game.add.text(5, 5, scoreString + score, {font:'16px Arial', fill:'#fff'});
 		//lives
@@ -221,6 +226,7 @@ var Game =
 
 	update: function() 
 	{
+
 	    if (!timepaused)back.tilePosition.y += 2;
 		if (game.time.now > spawnTime) this.makeEnemy();
 		this.fireBullet();
@@ -228,7 +234,7 @@ var Game =
 		//updates the UI counters
 		scoreText.text = scoreString + score;
 		lifeCounter.text = "X " + lives;
-
+		this.timerTick();
 	    //collision tests
 		game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
 	    game.physics.arcade.overlap(screenEdge, meteors,this.enemyOffScreen);
@@ -681,6 +687,20 @@ var Game =
 		pauseText.tint = 0xFFFFF;
 		pauseText.anchor.setTo(0.5, 0.5);
 		}
+	},
+	timerTick: function(){
+		var currentTime = new Date();
+    	var timeDifference = currentTime.getTime() - runTimerStart.getTime();
+
+    	var runTimerHun = Math.floor(timeDifference%1000/10);
+		var runTimerSec = Math.floor(timeDifference%60000/1000);
+		var runTimerMin = Math.floor(timeDifference/60000);;
+
+    	runTimerString = (runTimerMin < 10) ? "0" + runTimerMin : runTimerMin;
+    	runTimerString += (runTimerSec < 10) ? ":0" + runTimerSec : ":" + runTimerSec;
+    	runTimerString += (runTimerHun < 10) ? ".0" + runTimerHun : "." + runTimerHun;
+
+		runTimer.text = runTimerString;
 	}
 }
 
