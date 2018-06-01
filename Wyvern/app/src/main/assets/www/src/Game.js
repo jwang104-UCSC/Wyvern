@@ -2,7 +2,6 @@ var Game =
 {
 	create: function() {
 		game.stage.smoothed = false;
-		
 		game.time.advancedTiming = true;
 		that = this;
 		verbose = false;
@@ -269,6 +268,7 @@ var Game =
 		var x = hitbox.body.x;
 		var y = hitbox.body.y;
 		if (timepaused){
+			canShoot = false;
 			warudoEnd.play();
 			var ring = game.add.sprite(x+5, y+5, 'bombboom');
 			ring.scale.setTo(30);
@@ -286,6 +286,7 @@ var Game =
 		    		drops.body.velocity.y = drops.warudo[1];
 		    		drops.tint = 0xffffff;
 		    	});
+		    	canShoot = true;
 				bullets.forEachAlive(function(bullets){bullets.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;});
 				spawnTime = game.time.now+3000;
 			}
