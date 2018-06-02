@@ -185,6 +185,7 @@ var Game =
 		//These coord offsets are probably all wrong once we get real sprites
 		//UI
 		runTimerStart = new Date();
+		runTimerPaused = 0;
 		runTimerString = "00:00.00";
 		runTimer = game.add.text(game.world.width, game.world.height - 25, runTimerString, 
 					{font:'16px Arial', fill:'#fff', align:"right"});
@@ -234,7 +235,7 @@ var Game =
 		//updates the UI counters
 		scoreText.text = scoreString + score;
 		lifeCounter.text = "X " + lives;
-		this.timerTick();
+		if (!timepaused)this.timerTick();
 	    //collision tests
 		game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
 	    game.physics.arcade.overlap(screenEdge, meteors,this.enemyOffScreen);
@@ -279,24 +280,29 @@ var Game =
 		}
 	},
 	pauseTime: function(){
+		function uiFadeIn(object){
+			game.add.tween(object).to({ alpha: 1}, 300, Phaser.Easing.Quadratic.Out, true);
+		}
+		function uiFadeOut(object){
+			game.add.tween(object).to({ alpha: 0}, 700, Phaser.Easing.Quadratic.Out, true);
+		}
 		var x = hitbox.body.x;
 		var y = hitbox.body.y;
+
 		if (timepaused){
 			game.time.events.remove(resumeTime);
 			clockTick.stop();
 			canShoot = false;
 			warudoEnd.play();
-			// var ring = bigboom.getFirstExists(false);
-			// ring.scale.setTo(30);
-			// ring.anchor.setTo(0.5);
-			// ring.reset(x+5, y+5);
-			// var zoom = game.add.tween(ring.scale).to( { x: 0,y:0 }, 1000, Phaser.Easing.Linear.None, true);
 			game.add.tween(back).to( { tint: 0x808080}, 1000, Phaser.Easing.Linear.None, true);
-			//zoom.onComplete.add(blah, this);
 			game.time.events.add(1250, unpause, this);
 			function unpause(){
 				bgm.resume();
 				timepaused = false;
+				uiFadeIn(runTimer);
+				uiFadeIn(lifeCount);
+				uiFadeIn(lifeCounter);
+				uiFadeIn(scoreText);
 				meteors.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
 		    	eyes.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
 		    	drops.forEachAlive(function(drops){
@@ -309,7 +315,7 @@ var Game =
 		    		if(!drops.warudo){
 			            drops.body.velocity.y = 100;
 			        }
-		    	});
+		    	});7
 		    	canShoot = true;
 				bullets.forEachAlive(function(bullets){bullets.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;});
 				spawnTime = game.time.now+3000;
@@ -318,6 +324,10 @@ var Game =
 		}
 		else{
 			timepaused = true;
+			uiFadeOut(runTimer);
+			uiFadeOut(lifeCount);
+			uiFadeOut(lifeCounter);
+			uiFadeOut(scoreText);
 			bgm.pause();
 			warudo.play();
 			var ring = bigboom.getFirstExists(false);
@@ -431,7 +441,7 @@ var Game =
 	    victim.hp--;
 	    victim.tint = 0xFF0000;
 	    //change tint back after delay in millisecond
-	    game.time.events.add(20, function(){victim.tint = 0xFFFFFF});
+	    game.time.events.add(30, function(){victim.tint = 0xFFFFFF});
 	    //check if victim dies
 	    if(!timepaused)that.victimCheck(victim);
 	    
@@ -657,6 +667,7 @@ var Game =
 			sprite.inputEnabled = true;
 			pauseText.kill();
 			game.paused = false;
+			runTimerPaused +=game.time.pauseDuration;
 		}//if not paused, pause and make menu
 		else
 		{
@@ -690,7 +701,7 @@ var Game =
 	},
 	timerTick: function(){
 		var currentTime = new Date();
-    	var timeDifference = currentTime.getTime() - runTimerStart.getTime();
+    	var timeDifference = currentTime.getTime() - runTimerStart.getTime()- runTimerPaused;
 
     	var runTimerHun = Math.floor(timeDifference%1000/10);
 		var runTimerSec = Math.floor(timeDifference%60000/1000);
