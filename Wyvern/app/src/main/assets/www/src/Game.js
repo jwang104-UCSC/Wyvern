@@ -23,17 +23,23 @@ var Game =
 		   we use the modified variables in Shop.js
 		*/
 
-		if(typeof shotSpread === 'undefined') 
+		shotSpread = parseInt(Cookies.get("shotSpread"));
+		if (isNaN(shotSpread)) 
 		{
 			shotSpread = 1;
-		} 
+			Cookies.set('shotSpread', shotSpread);
+		}
 
 		iFrames = 1;
 		score = 0;
 
 		// Save the lives as a cookie
 		lives = parseInt(Cookies.get("lives"));
-		if (isNaN(lives)) lives = 5;
+		if (isNaN(lives)) 
+		{
+			lives = 5;
+			Cookies.set('lives', lives);
+		}
 
 		spawnTime = 0;
 		bulletTime = 0;
@@ -219,6 +225,45 @@ var Game =
 	    	
 	    shootToggle.scale.setTo(0.6, 0.6);
 	    shootToggle.tint = 0xff0000;
+
+	    //DESTROY EVERYTHING
+	    game.time.events.add(Phaser.Timer.SECOND * 1, function(){game.sound.stopAll(); 
+	    	for(var i = 0; i < eyes.length; i++) 
+	    	{
+	    		//this.bombPickup(eyes.getAt(i).body.x, eyes.getAt(i).body.y);
+	    		explodeEnd(eyes.getAt(i).body.x, eyes.getAt(i).body.y);
+	    	}; 
+	    	for(var i = 0; i < meteors.length; i++) 
+	    	{
+	    		//this.bombPickup(meteors.getAt(i).body.x, meteors.getAt(i).body.y);
+	    		explodeEnd(meteors.getAt(i).body.x, meteors.getAt(i).body.y);
+	    	};
+	    	eyes.destroy(); meteors.destroy(); bullets.destroy(); game.add.audio('explodes2', 0.1, false).play();}, this);
+
+	    // Make the dragon fly away
+	    game.time.events.add(Phaser.Timer.SECOND * 1.5, function(){
+	    	sprite.inputEnabled = false;
+	    	game.add.tween(sprite).to({y: 0, alpha: 0}, 1500, Phaser.Easing.Linear.None, true);}, this);
+	    // END THE GAME AND PAUSE
+	    game.time.events.add(Phaser.Timer.SECOND * 3, function(){
+	    	scoreText.destroy(); 
+	    	lifeCounter.destroy();
+	    	lifeCount.destroy();
+	    	runTimer.destroy(); 
+	    	pauseButton.destroy();
+	    	shootToggle.destroy(); // REMOVE IF NEEDED
+	    	game.paused = true;
+	    	pauseScreen = game.add.sprite(0, 0, 'pauseScreen'); 
+	    	pauseText   = game.add.bitmapText(game.world.width*0.5, game.world.height*0.2, 'titleFont', "   Level\nComplete!", 40);
+	    	pauseText.anchor.setTo(0.5, 0.5);
+	    	finalscore = game.add.bitmapText(game.world.width*0.5, game.world.height*0.5, 'titleFont', "Final score: " + score, 30);
+	    	finalscore.anchor.setTo(0.5, 0.5);
+	    	nextButton = createButton("Next Level", 10, game.world.width*0.5, game.world.height*0.8, 
+								140, 30, function(){game.paused = false; game.state.start('Game')});
+	    	returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
+								160, 30, function(){game.paused = false; game.state.start('MainMenu')});
+	    	}, this);
+
 
 	    //uncomment this to test an enemy!
 	    //this.spawnEnemy("eyes",game.world.width*0.5, 150, 0, 0);
@@ -718,11 +763,30 @@ var Game =
 function explodeFunct(x, y)
 {
 	var explosion = explosions.getFirstExists(false);
-    explosion.reset(x, y);
-    explosion.scale.setTo(0.3);
-    explosion.alpha = 0.5;
-    explosion.play('explode', 30, false, true);
+	if (explosion)
+	{
+    	explosion.reset(x, y);
+   		explosion.scale.setTo(0.3);
+    	explosion.alpha = 0.5;
+    	xds = game.add.audio('explodes2', 0.1, false);
+    	xds.play();
+    	explosion.play('explode', 30, false, true);
+	}
 }
+
+function explodeEnd(x, y)
+{
+	var explosion = explosions.getFirstExists(false);
+	if (explosion)
+	{
+    	explosion.reset(x, y);
+   		explosion.scale.setTo(0.3);
+    	explosion.alpha = 0.5;
+    	explosion.play('explode', 30, false, true);
+	}
+}
+
+
 function resetFunct(object)
 {
 if(verbose)console.log(object.name+" just reset");

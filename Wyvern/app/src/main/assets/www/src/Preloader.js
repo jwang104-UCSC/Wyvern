@@ -7,16 +7,11 @@ var Preloader = {
 
 		game.load.image('mainMenu-bg', 'img/mainMenu-bg.png')
 		game.load.image('screen-bg', 'img/screen-bg.png');
-		//game.load.image('screen-mainmenu', 'img/screen-mainmenu.png');
+		game.load.image('shop-bg', 'img/shop-bg.jpg');
 		game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
-		//game.load.image('starfield', 'img/starfield.png');
 		//game.load.image('redsky', 'img/redsky.jpg');
 		game.load.image('redsky', 'img/redskyloop.png');
 		game.load.image('pauseScreen', 'img/pause-screen.png');
-
-		// game.load.image('hi', 'img/hi.png');
-		// game.load.image('no', 'img/no.png');
-		// game.load.image('wat', 'img/what.png');
 
 		game.load.image('shield', 'img/shield36x36-2.png');
 		game.load.image('bomb', 'img/bomb36x36.png');
@@ -38,6 +33,7 @@ var Preloader = {
 		
 		game.load.bitmapFont('buttonStyle', 'img/carrier_command.png', 'img/carrier_command.xml');
 		game.load.bitmapFont('titleFont', 'img/desyrel.png', 'img/desyrel.xml');
+		game.load.bitmapFont('xsa', 'img/shortStack.png', 'img/shortStack.xml');
 
 
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
@@ -45,6 +41,8 @@ var Preloader = {
 		game.load.audio('warudoSFX', 'sfx/Za Warudo.mp3');
 		game.load.audio('warudoEndSFX', 'sfx/Warudo End.ogg');
 		game.load.audio('clockTick', 'sfx/clockTick.ogg');
+		game.load.audio('explodes', 'sfx/explode1.wav');
+		game.load.audio('explodes2', 'sfx/explosion.mp3');
 		
 
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
@@ -57,7 +55,7 @@ var Preloader = {
 		game.add.plugin(PhaserInput.Plugin);
 		//loads right into the game because I'm tired of clicking the menu away
 		game.state.start("Game");
-		//game.state.start("Hub");
+		//game.state.start("Shop");
 		//game.state.start("MainMenu");
 	}
 }
