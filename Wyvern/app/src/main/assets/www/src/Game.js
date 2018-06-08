@@ -9,6 +9,12 @@ var Game =
 		game.time.advancedTiming = true;
 		that = this;
 		verbose = false;
+		if (typeof levelSettings === "undefined") {
+		    console.log("levelSettings is undefined, default to lv1");
+		    levelSettings = lv1;
+		}else{
+			console.log(levelSettings);
+		}
 
 		//Setup gameplay variables here
 		pauseLength = 4;
@@ -19,7 +25,7 @@ var Game =
 		iFrames = 1;
 
 		spawnTime = 0;
-		spawnDelay = 200;
+		spawnDelay = levelSettings["spawnDelay"];
 		bulletTime = 0;
 		firingTime = 0;
 		hurtTime = 0;
@@ -28,18 +34,14 @@ var Game =
 		invulnerable = false;
 		levelEnding = false;
 
-		enemyToughness = 2;
+		enemyToughness = levelSettings["enemyToughness"];
 		lifeUpCounter = 0;
-		score = 0;
+		score = levelSettings["score"];
+		lives = levelSettings["lives"];
 
-
-		// Save the lives as a cookie
-		lives = parseInt(Cookies.get("lives"));
-		if (isNaN(lives)) 
-		{
-			lives = 5;
-			Cookies.set('lives', lives);
-		}
+		// Get potential extra lives from cookies
+		bonusLives = parseInt(Cookies.get("bonus lives"));
+		if (!isNaN(bonusLives)) lives += bonusLives;
 
 		shotSpread = parseInt(Cookies.get("shotSpread"));
 		if (isNaN(shotSpread)) 
@@ -50,7 +52,7 @@ var Game =
 		//gameplay-related vars end
 
 		//background music & sound effects
-		bgm = game.add.audio('cosmosBGM', 0.2, true);
+		bgm = game.add.audio(levelSettings["bgm"], 0.2, true);
 		warudo = game.add.audio('warudoSFX', 0.7);
 		warudoEnd = game.add.audio('warudoEndSFX', 1);
 		clockTick = game.add.audio('clockTick', 0.3, true);
@@ -147,7 +149,7 @@ var Game =
 			e.play('fly');
 	        e.exists = false;
 	        e.visible = false;
-	        e.hp = enemyToughness+2;
+	        e.hp = enemyToughness+1;
 	        e.worth = 50;
 	    }
 
@@ -196,8 +198,10 @@ var Game =
 	    bigboom.createMultiple(100, 'bombboom');
 
 		//UI
-		runTimerStart = new Date();
-		runTimerPaused = 0;
+		if (typeof levelSettings["TimerStart"] === "undefined") runTimerStart = new Date();
+		else runTimerStart = levelSettings["TimerStart"];
+		if (typeof levelSettings["TimerPaused"] === "undefined") runTimerPaused = 0;
+		else runTimerPaused = levelSettings["TimerPaused"];
 		runTimerString = "00:00.00";
 		runTimer = game.add.text(game.world.width, game.world.height - 25, runTimerString, 
 					{font:'16px Arial', fill:'#fff', align:"right"});
@@ -354,11 +358,11 @@ var Game =
 	},
 	makeEnemy: function() 
 	{	
-		if (Math.random() > 0.2){
+		if (Math.random() > levelSettings["makeEnemy%"]){
 		var x = randomIntFromInterval(0, game.world.width);
 		var xspeed = randomIntFromInterval(-40, 40);
 		var yspeed = randomIntFromInterval(150, 250);
-		this.spawnEnemy("meteors",x, -10, xspeed, yspeed);
+		this.spawnEnemy(levelSettings["Enemy Type 1"],x, -10, xspeed, yspeed);
 		}else{
 			var mult = 1;
 			if(Math.random()>0.5){var x = -10;}
@@ -373,7 +377,7 @@ var Game =
 			if(Math.random()>0.5) yaccel *=-1;
 			if (Math.random() > 0.9){yspeed = 0; xaccel = 0; yaccel = 0;}
 			for(var i=0; i<5; i++){
-	    			game.time.events.add(150*i, function(){that.spawnEnemy("eyes",x, y, xspeed, yspeed, xaccel, yaccel)});
+	    			game.time.events.add(150*i, function(){that.spawnEnemy(levelSettings["Enemy Type 2"],x, y, xspeed, yspeed, xaccel, yaccel)});
 		}
 		}
 	},
@@ -474,8 +478,6 @@ var Game =
 	victimDies: function(victim, scoreGain){
 			if(victim.key == "eyes")eyeDeath.play();
 			else if(victim.key == "meteor")rockDeath.play();
-		    resetFunct(victim);
-		    //reset hp
 		    that.enemyReset(victim);
 		    //Increase the score
 		    score += scoreGain;
@@ -588,7 +590,7 @@ var Game =
     	if (!timepaused)that.victimDies(enemy, 50);
     },
 	enemyReset: function(enemy){
-	    if(enemy.key == "meteors") enemy.hp = enemyToughness+2;
+	    if(enemy.key == "meteor") enemy.hp = enemyToughness+1;
     	else enemy.hp = enemyToughness;
 		if(enemy.scale.x <0) enemy.scale.x *=-1;
 		enemy.tint = 0xffffff;
@@ -691,15 +693,35 @@ var Game =
 		    	pauseButton.kill();
 		    	shootToggle.kill(); // REMOVE IF NEEDED
 		    	this.pauseFunct("   Level\nComplete!", 40, 0xFFFFFF);
-		    	finalscore = game.add.bitmapText(game.world.width*0.5, game.world.height*0.5, 'titleFont', "Final score: " + score, 25);
+		    	finalscore = game.add.bitmapText(game.world.width*0.5, game.world.height*0.5, 'titleFont', "Score: " + score, 30);
 		    	finalscore.anchor.setTo(0.5, 0.5);
 		    	nextButton = createButton("Next Level", 10, game.world.width*0.5, game.world.height*0.8, 
-									140, 30, function(){game.paused = false; game.state.start('Game')});
+									140, 30, function(){
+										game.paused = false;
+										runTimerPaused +=game.time.pauseDuration;
+								    	that.setLevelSettings();
+										game.state.start('Game')
+									});
 		    	returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
 									160, 30, function(){game.paused = false; game.state.start('MainMenu')});
 		    }
 	    }, this);
 
+	},
+	setLevelSettings: function(){
+    	if (levelSettings["level"] == 1){
+    		levelSettings = lv2;
+    	}
+		else if (levelSettings["level"] == 2){
+			levelSettings = lv3;
+		}
+		else {
+			levelSettings = lv1; //loop around?
+		}
+		levelSettings["score"] = score;
+		levelSettings["lives"] = lives;
+		levelSettings["TimerStart"] = runTimerStart;
+		levelSettings["TimerPaused"] = runTimerPaused;
 	},
 	gameOver: function()
 	{

@@ -38,6 +38,8 @@ var Preloader = {
 
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
 		game.load.audio('cosmosBGM', 'sfx/Metal Slug 3 - Into the Cosmos.ogg');
+		//placeholder lv.2 bgm
+		game.load.audio('gunsBGM', 'sfx/mus107.ogg');
 		game.load.audio('warudoSFX', 'sfx/Za Warudo.mp3');
 		game.load.audio('warudoEndSFX', 'sfx/Warudo End.ogg');
 		game.load.audio('clockTick', 'sfx/clockTick.ogg');
@@ -65,8 +67,8 @@ var Preloader = {
 	{
 		game.add.plugin(PhaserInput.Plugin);
 		//loads right into the game because I'm tired of clicking the menu away
-		game.state.start("Game");
+		//game.state.start("Game");
 		//game.state.start("Shop");
-		//game.state.start("MainMenu");
+		game.state.start("Hub");
 	}
 }
