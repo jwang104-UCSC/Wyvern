@@ -2,7 +2,7 @@ var Shop =
 {
 	create: function()
 	{
-		game.add.sprite(-300, 0, 'nice');
+		game.add.sprite(-300, 0, 'shop-bg');
 
 		//Custom green text
 		var txt = game.add.bitmapText(game.world.width*0.5, game.world.height*0.1, 'titleFont', "UPGRADES", 40);

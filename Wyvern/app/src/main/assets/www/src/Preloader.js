@@ -68,7 +68,7 @@ var Preloader = {
 		game.add.plugin(PhaserInput.Plugin);
 		//loads right into the game because I'm tired of clicking the menu away
 		//game.state.start("Game");
-		//game.state.start("Shop");
-		game.state.start("Hub");
+		game.state.start("Shop");
+		//game.state.start("Hub");
 	}
 }

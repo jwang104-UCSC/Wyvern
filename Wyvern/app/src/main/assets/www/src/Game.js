@@ -16,157 +16,20 @@ var Game =
 			console.log(levelSettings);
 		}
 
-		//Setup gameplay variables here
-		pauseLength = 4;
-		shootRateMultiplier = 1;
-		baseShotSpeed = -200;
-		shotSpeedMultiplier = 1;
-		dropRate = 0.05;
-		iFrames = 1;
+		//Background
+		background = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
+		background.tint = 0x808080;
 
-		spawnTime = 0;
-		spawnDelay = levelSettings["spawnDelay"];
-		bulletTime = 0;
-		firingTime = 0;
-		hurtTime = 0;
-		canShoot = true;
-		timepaused = false;
-		invulnerable = false;
-		levelEnding = false;
+		//Setup for game variables and audio
+		this.gameSetup();
+		this.audioSetup();
 
-		enemyToughness = levelSettings["enemyToughness"];
-		lifeUpCounter = 0;
-		score = levelSettings["score"];
-		lives = levelSettings["lives"];
+		//Create groups for the following assets
+		this.initializeBullets();
+		this.initializeDrops();
+		this.initializeEnemies();
 
-		// Get potential extra lives from cookies
-		bonusLives = parseInt(Cookies.get("bonus lives"));
-		if (!isNaN(bonusLives)) lives += bonusLives;
-
-		shotSpread = parseInt(Cookies.get("shotSpread"));
-		if (isNaN(shotSpread)) 
-		{
-			shotSpread = 1;
-			Cookies.set('shotSpread', shotSpread);
-		}
-		//gameplay-related vars end
-
-		//background music & sound effects
-		bgm = game.add.audio(levelSettings["bgm"], 0.2, true);
-		warudo = game.add.audio('warudoSFX', 0.7);
-		warudoEnd = game.add.audio('warudoEndSFX', 1);
-		clockTick = game.add.audio('clockTick', 0.3, true);
-		xds = game.add.audio('explodes2', 0.35);
-		boomb = game.add.audio('explodes', 0.2);
-		eyeHit = game.add.audio('eyehit', 0.1);
-		eyeDeath = game.add.audio('eyedeath', 0.1);
-		rockHit = game.add.audio('rockhit', 0.1);
-		rockDeath = game.add.audio('rockdeath', 0.1);
-		shieldUp = game.add.audio('shieldUp', 0.15);
-		shieldTouch = game.add.audio('shieldTouch', 0.1);
-		shieldDown = game.add.audio('shieldDown', 0.15);
-		playerHurt = game.add.audio('hurt', 0.15);
-		
-		
-		sfxGroup = {xds, boomb, eyeHit, eyeDeath, rockHit, rockDeath, shieldUp, shieldTouch, shieldDown, playerHurt};
-		for(var i = 0; i < sfxGroup.length; i++){
-			sfxGroup[i].allowMultiple = true;
-		}
-		bgm.play();
-
-		//background
-		back = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
-		back.tint = 0x808080;
-
-		//makes bullets
-	 	bullets = game.add.group();
-	    bullets.enableBody = true;
-	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
-
-	    for (var i = 0; i < 1000; i++)
-	    { 
-	        var b = bullets.create(0, 0, 'fireball');
-	        b.scale.setTo(0.01);
-	        b.name = 'bullet' + i;
-	        b.anchor.setTo(0.5, 0.5);
-	        b.exists = false;
-	        b.visible = false;
-	        b.checkWorldBounds = true;
-	        b.events.onOutOfBounds.add(resetFunct, this);
-	        b.tween = null;
-	    }
-
-		//makes drops
-		drops = game.add.group();
-		drops.enableBody = true;
-		drops.physicsBodyType = Phaser.Physics.ARCADE;
-
-	    for (var i = 0; i < 100; i++)
-	    { 
-	        var d = drops.create(0, 0, 'shield');
-	        d.dropType = 0;
-	        d.name = 'drop' + i;
-	        d.scale.setTo(0.6)
-	        d.anchor.setTo(0.5, 0.5);
-	        d.exists = false;
-	        d.visible = false;
-	        d.checkWorldBounds = true;
-	        d.body.collideWorldBounds = true;
-	        d.events.onOutOfBounds.add(resetFunct, this);
-	        d.body.maxVelocity.setTo(150);
-	        d.timer = null;
-	    }
-
-		//makes enemies
-		eyes = game.add.group();
-	    meteors = game.add.group();
-
-		eyes.enableBody = true;
-		eyes.physicsBodyType = Phaser.Physics.ARCADE;
-	    for (var i = 0; i < 100; i++)
-	    { 
-	        var e = eyes.create(0, 0, 'eyes');
-	        e.name = 'eyes' + i;
-			e.anchor.setTo(0.5, 0.5);
-			e.animations.add("fly", 
-				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], 20, true);
-			e.play('fly');
-	        e.exists = false;
-	        e.visible = false;
-	        e.hp = enemyToughness;
-	        e.worth = 100;
-	    }
-
-		meteors.enableBody = true;
-		meteors.physicsBodyType = Phaser.Physics.ARCADE;
-	    for (var i = 0; i < 100; i++)
-	    { 
-	        var e = meteors.create(0, 0, 'meteor');
-	        e.name = 'rock' + i;
-			e.anchor.setTo(0.5, 0.5);
-			e.animations.add("fly", 
-				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18,19,20,21,22,23,24,25,26,27,28,29], 20, true);
-			e.play('fly');
-	        e.exists = false;
-	        e.visible = false;
-	        e.hp = enemyToughness+1;
-	        e.worth = 50;
-	    }
-
-		//make a barrier off the edges of screen to despawn offscreen enemies
-		screenEdge = game.add.group();
-		screenEdge.enableBody = true;
-		screenEdge.physicsBodyType = Phaser.Physics.ARCADE;
-
-		screenBottomBar = screenEdge.create(0, game.world.height+50, 'preloaderBar');
-		screenBottomBar.width = 1.5*game.world.width;
-		screenTopBar = screenEdge.create(0, 0-50, 'preloaderBar');
-		screenTopBar.width = 1.5*game.world.width;
-		screenLeftBar = screenEdge.create(0-50, 0, 'preloaderBar');
-		screenLeftBar.height = 1.5*game.world.height;
-		screenLeftBar.width = 10;
-		screenRightBar = screenEdge.create(game.world.width+50, 0, 'preloaderBar');
-		screenRightBar.height = 1.5*game.world.height;
+		this.createDespawnBars();
 
 		//player
 		sprite = game.add.sprite(game.world.width*0.5, game.world.centerY*1.8, 'dragon');
@@ -228,7 +91,7 @@ var Game =
 	update: function() 
 	{
 
-	    if (!timepaused)back.tilePosition.y += 2;
+	    if (!timepaused)background.tilePosition.y += 2;
 		if (game.time.now > spawnTime) this.makeEnemy();
 		this.fireBullet();
 
@@ -255,6 +118,98 @@ var Game =
 	{
 		game.debug.text(game.time.fps || '--', 2, 14, "#00ff00"); 
 	},
+
+	//Setup for all required gameplay variables
+	gameSetup: function()
+	{
+		pauseLength = 4;
+		shootRateMultiplier = 1;
+		baseShotSpeed = -200;
+		shotSpeedMultiplier = 1;
+		dropRate = 0.05;
+		iFrames = 1;
+
+		spawnTime = 0;
+		spawnDelay = levelSettings["spawnDelay"];
+		bulletTime = 0;
+		firingTime = 0;
+		hurtTime = 0;
+		canShoot = true;
+		timepaused = false;
+		invulnerable = false;
+		levelEnding = false;
+
+		enemyToughness = levelSettings["enemyToughness"];
+		lifeUpCounter = 0;
+		score = levelSettings["score"];
+		lives = levelSettings["lives"];
+
+		// Get potential extra lives from cookies
+		bonusLives = parseInt(Cookies.get("bonus lives"));
+		if (!isNaN(bonusLives)) lives += bonusLives;
+
+		shotSpread = parseInt(Cookies.get("shotSpread"));
+		if (isNaN(shotSpread)) 
+		{
+			shotSpread = 1;
+			Cookies.set('shotSpread', shotSpread);
+		}
+		//gameplay-related vars end
+	},
+
+	//Setup for all required audio files
+	audioSetup: function()
+	{
+		//background music & sound effects
+		bgm         = game.add.audio(levelSettings["bgm"], 0.2, true);
+		warudo      = game.add.audio('warudoSFX', 0.7);
+		warudoEnd   = game.add.audio('warudoEndSFX', 1);
+		clockTick   = game.add.audio('clockTick', 0.3, true);
+		xds         = game.add.audio('explodes2', 0.35);
+		boomb       = game.add.audio('explodes', 0.2);
+
+		playerHurt  = game.add.audio('hurt', 0.15);
+
+		eyeHit      = game.add.audio('eyehit', 0.1);
+		eyeDeath    = game.add.audio('eyedeath', 0.1);
+
+		rockHit     = game.add.audio('rockhit', 0.1);
+		rockDeath   = game.add.audio('rockdeath', 0.1);
+
+		shieldUp    = game.add.audio('shieldUp', 0.15);
+		shieldTouch = game.add.audio('shieldTouch', 0.1);
+		shieldDown  = game.add.audio('shieldDown', 0.15);
+		
+		sfxGroup = {xds, boomb, eyeHit, eyeDeath, rockHit, rockDeath, shieldUp, shieldTouch, shieldDown, playerHurt};
+		for(var i = 0; i < sfxGroup.length; i++){
+			sfxGroup[i].allowMultiple = true;
+		}
+
+		//Play looping background music for the level
+		bgm.play();
+	},
+
+	//Create barriers on the edges of the screen to despawn offscreen enemies
+	createDespawnBars : function()
+	{
+		//Group to store the barriers
+		screenEdge = game.add.group();
+		screenEdge.enableBody = true;
+		screenEdge.physicsBodyType = Phaser.Physics.ARCADE;
+
+		//Make the barriers according to screen specifications
+		screenTopBar    = screenEdge.create(0, -50, 'preloaderBar');
+		screenBottomBar = screenEdge.create(0, game.world.height + 50, 'preloaderBar');
+		screenLeftBar   = screenEdge.create(-50, 0, 'preloaderBar');
+		screenRightBar  = screenEdge.create(game.world.width + 50, 0, 'preloaderBar');
+
+		screenTopBar.width   = screenBottomBar.width = game.world.width*1.5;
+		screenLeftBar.height = screenRightBar.height = game.world.height*1.5;
+
+		//Shrinks size of left barrier to hide it offscreen
+		screenLeftBar.width = 10; 
+	},
+
 	pauseTime: function(){
 		function uiFadeIn(object){
 			game.add.tween(object).to({ alpha: 1}, 300, Phaser.Easing.Quadratic.Out, true);
@@ -274,7 +229,7 @@ var Game =
 			clockTick.stop();
 			canShoot = false;
 			warudoEnd.play();
-			game.add.tween(back).to( { tint: 0x808080}, 1000, Phaser.Easing.Linear.None, true);
+			game.add.tween(background).to( { tint: 0x808080}, 1000, Phaser.Easing.Linear.None, true);
 			game.time.events.add(1250, unpause, this);
 			function unpause(){
 				bgm.resume();
@@ -321,7 +276,7 @@ var Game =
 			var boomtime = 700;
 
 			game.add.tween(ring.scale).to( { x: 30,y:30 }, boomtime, Phaser.Easing.Linear.None, true);
-			game.add.tween(back).to( { tint:0x333333 }, boomtime*2, Phaser.Easing.Linear.None, true);
+			game.add.tween(background).to( { tint:0x333333 }, boomtime*2, Phaser.Easing.Linear.None, true);
 			game.time.events.add(boomtime, 
 				function(){
 					game.add.tween(ring.scale).to( { x: 0,y:0 }, boomtime, Phaser.Easing.Linear.None, true);
@@ -414,6 +369,94 @@ var Game =
 		that.enemyReset(enemy);
 	},
 
+	//Creates the bullets fired by the player
+	initializeBullets: function()
+	{
+		//Group to store bullets
+	 	bullets = game.add.group();
+	    bullets.enableBody = true;
+	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    //CHANGE 1000 MAYBE?
+	    for (var i = 0; i < 1000; i++)
+	    {
+	        var b = bullets.create(0, 0, 'fireball');
+	        b.scale.setTo(0.01);
+	        b.name = 'bullet' + i;
+	        b.anchor.setTo(0.5, 0.5);
+	        b.exists = false;
+	        b.visible = false;
+	        b.checkWorldBounds = true;
+	        b.events.onOutOfBounds.add(resetFunct, this);
+	        b.tween = null;
+	    }
+	},
+
+	//Creates power up drops from enemies
+	initializeDrops: function()
+	{
+		//Group to store drops
+		drops = game.add.group();
+		drops.enableBody = true;
+		drops.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    for (var i = 0; i < 100; i++)
+	    { 
+	        var d = drops.create(0, 0, 'shield');
+	        d.dropType = 0;
+	        d.name = 'drop' + i;
+	        d.scale.setTo(0.6)
+	        d.anchor.setTo(0.5, 0.5);
+	        d.exists = false;
+	        d.visible = false;
+	        d.checkWorldBounds = true;
+	        d.body.collideWorldBounds = true;
+	        d.events.onOutOfBounds.add(resetFunct, this);
+	        d.body.maxVelocity.setTo(150);
+	        d.timer = null;
+	    }
+	},
+
+	//Creates all the enemies used in the level
+	initializeEnemies: function()
+	{
+		//makes enemies
+		eyes = game.add.group();
+	    meteors = game.add.group();
+
+		eyes.enableBody = true;
+		eyes.physicsBodyType = Phaser.Physics.ARCADE;
+	    for (var i = 0; i < 100; i++)
+	    { 
+	        var e = eyes.create(0, 0, 'eyes');
+	        e.name = 'eyes' + i;
+			e.anchor.setTo(0.5, 0.5);
+			e.animations.add("fly", 
+				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], 20, true);
+			e.play('fly');
+	        e.exists = false;
+	        e.visible = false;
+	        e.hp = enemyToughness;
+	        e.worth = 100;
+	    }
+
+		meteors.enableBody = true;
+		meteors.physicsBodyType = Phaser.Physics.ARCADE;
+	    for (var i = 0; i < 100; i++)
+	    { 
+	        var e = meteors.create(0, 0, 'meteor');
+	        e.name = 'rock' + i;
+			e.anchor.setTo(0.5, 0.5);
+			e.animations.add("fly", 
+				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,18,19,20,21,22,23,24,25,26,27,28,29], 20, true);
+			e.play('fly');
+	        e.exists = false;
+	        e.visible = false;
+	        e.hp = enemyToughness+1;
+	        e.worth = 50;
+	    }	
+	},
+
 	fireBullet: function() 
 	{
 		if (!canShoot) return;
@@ -497,8 +540,9 @@ var Game =
 			game.time.events.add(1000, function(){lives++});
 		}
 	},
+
 	itemPickup: function(player, drop) {
-		if (!(typeof drop.timer === "undefined"))
+		if (typeof drop.timer != "undefined")
     						game.time.events.remove(drop.timer);
 	    resetFunct(drop);
 	    //applies buff
@@ -506,7 +550,7 @@ var Game =
     	//console.log(drop.key);
 	    switch(drop.dropType){
 	    	case 0: 	
-    				if (!(typeof invulnEvent === "undefined"))
+    				if (typeof invulnEvent != "undefined")
     						game.time.events.remove(invulnEvent);
     				invuln.alpha=0.8;
     				invuln.scale.setTo(0);
@@ -569,6 +613,7 @@ var Game =
         	}
         }
 	},
+
 	bombPickup: function(x, y)
 	{
 		//var bigboom = game.add.sprite(x, y, 'bombboom');
@@ -585,10 +630,12 @@ var Game =
 		game.time.events.add(boomtime, function(){boom.kill()});
 		spawnTime = game.time.now + 2000;
 	},
+
 	enemyBombed: function(boom, enemy) 
 	{
     	if (!timepaused)that.victimDies(enemy, 50);
     },
+
 	enemyReset: function(enemy){
 	    if(enemy.key == "meteor") enemy.hp = enemyToughness+1;
     	else enemy.hp = enemyToughness;
@@ -725,7 +772,6 @@ var Game =
 	},
 	gameOver: function()
 	{
-		//console.log("Game over");
 		this.pauseFunct("DEFEAT", 50, 0xFFFFF);
 		var textFormat = {font:'16px Arial', fill:'#fff'};
 		var highscore = parseInt(Cookies.get("highscore"));
@@ -742,51 +788,50 @@ var Game =
 		endScore.anchor.setTo(0.5);
 		highscoreText.anchor.setTo(0.5);
 
-		game.sound.stopAll();
+		bgm.stop();
 		retryButton = createButton("Retry", 10, game.world.width*0.5, game.world.height*0.7,
 						 100, 30, function(){game.state.restart(); game.paused = false;});
 		exitButton  = createButton("Main Menu", 10, game.world.width*0.5, game.world.height*0.8,
 						 175, 30, function(){game.state.start('MainMenu'); game.paused = false; bgm.stop();});
-		//game.paused = true;
-		//lives = 5;
 	},
-	//pause menu stuff
-	//if paused, remove buttons and pause screen
+
+	//Pause menu setup
 	pauseMenu: function()
 	{
+		//Create or destroy pause menu accordingly
 		if(game.paused)
 		{
-			removeButton(resumeBtn)
-			removeButton(menuBtn)
-			removeButton(restartBtn)
+			removeButton(resumeButton);
+			removeButton(restartButton);
+			removeButton(titleButton);
 			that.pauseFunct();
-		}//if not paused, pause and make menu
+		}
 		else
 		{
 			that.pauseFunct("PAUSED!", 50, 0xFFFFF);
-			resumeBtn = createButton("Resume",10,game.world.width*0.5, game.world.height*0.6,
+			resumeButton  = createButton("Resume", 10, game.world.width*0.5, game.world.height*0.6,
 							 100, 30, that.pauseMenu);
-			restartBtn = createButton("Restart",10,game.world.width*0.5, game.world.height*0.7,
-							 100, 30, function(){game.state.restart(); game.sound.stopAll(); game.paused = false;});
-			menuBtn = createButton("Menu",10,game.world.width*0.5, game.world.height*0.8,
-							 100, 30, function(){game.state.start('MainMenu'); game.paused = false; bgm.stop();});
-
+			restartButton = createButton("Restart", 10, game.world.width*0.5, game.world.height*0.7,
+							 100, 30, function(){bgm.stop(); game.state.restart(); game.paused = false;});
+			titleButton   = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.8, 
+							160, 30, function(){bgm.stop(); game.state.start('MainMenu'); game.paused = false;});
 		}
 	},
+
 	//if paused, unpause and remove pause screen
 	pauseFunct: function(string, fontsize, tint, x, y)
 	{
 		if(game.paused)
 		{
 			pauseScreen.kill();
-			sprite.inputEnabled = true;
 			pauseText.kill();
+			sprite.inputEnabled = true;
 			game.paused = false;
 			runTimerPaused +=game.time.pauseDuration;
 		}//if not paused, pause and make menu
 		else
 		{
-		console.log("paused: ", string);
+		console.log("pauseFunct Text: ", string);
 		sprite.inputEnabled = false;
 		game.paused = true;
 
@@ -813,6 +858,7 @@ var Game =
 		pauseText.anchor.setTo(0.5, 0.5);
 		}
 	},
+
 	timerTick: function(){
 		var currentTime = new Date();
     	var timeDifference = currentTime.getTime() - runTimerStart.getTime()- runTimerPaused;
