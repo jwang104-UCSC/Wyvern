@@ -54,8 +54,7 @@ var Preloader = {
 		
 		
 
-		game.load.audio('explodes', 'sfx/063 explode.wav');
-		game.load.audio('explodes2', 'sfx/explosion.mp3');
+		game.load.audio('explosionSFX', 'sfx/063 explode.wav');
 		
 
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
