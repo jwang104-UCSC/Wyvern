@@ -6,7 +6,7 @@ var Game =
 			 Math.seedrandom(seed);
 		else Math.seedrandom();
 		game.stage.smoothed = false;
-		game.stage.disableVisibilityChange = true;
+		//game.stage.disableVisibilityChange = true;
 		game.time.advancedTiming = true;
 		that = this;
 		verbose = false;
@@ -53,13 +53,25 @@ var Game =
 		spawnDelay = 200;
 		//gameplay-related vars end
 
-		//background music
+		//background music & sound effects
 		//comment out the music for testing if you want
 		//volume is 0.2, loop is true
 		bgm = game.add.audio('cosmosBGM', 0.2, true);
 		warudo = game.add.audio('warudoSFX', 0.7);
 		warudoEnd = game.add.audio('warudoEndSFX', 1);
 		clockTick = game.add.audio('clockTick', 0.3, true);
+		xds = game.add.audio('explodes2', 0.2);
+		xds.allowMultiple = true;
+		boomb = game.add.audio('explodes', 0.2);
+		boomb.allowMultiple = true;
+		eyeHit = game.add.audio('hit', 0.1);
+		eyeHit.allowMultiple = true;
+		eyeDeath = game.add.audio('death', 0.1);
+		eyeDeath.allowMultiple = true;
+		rockHit = game.add.audio('rockhit', 0.1);
+		rockHit.allowMultiple = true;
+		rockDeath = game.add.audio('rockdeath', 0.1);
+		rockDeath.allowMultiple = true;
 		bgm.play();
 		//background
 		back = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
@@ -137,7 +149,7 @@ var Game =
 			e.play('fly');
 	        e.exists = false;
 	        e.visible = false;
-	        e.hp = enemyToughness+1;
+	        e.hp = enemyToughness+2;
 	        e.worth = 50;
 	    }
 	    // enemies.add(eyes);
@@ -209,10 +221,12 @@ var Game =
 	    pauseButton.scale.setTo(0.6, 0.6);
 	    //shooting toggle AKA debug button make it do whatever you want for testing
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
+
 	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
 	    	//function(){that.bombPickup(hitbox.body.x, hitbox.body.y)});
-	    	function(){that.makeDrops(100, 100, 2)});
-	    	//function(){that.makeDrops(50, 50)});
+	    	//function(){that.makeDrops(100, 100, 2)});
+	    	function(){that.endLevel()});
+
 	    	//function(){explodeFunct(game.world.width*0.5, 150);});
 	    	//function(){sprite.alpha = 1;});
 	    	//function(){that.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);});
@@ -225,44 +239,6 @@ var Game =
 	    	
 	    shootToggle.scale.setTo(0.6, 0.6);
 	    shootToggle.tint = 0xff0000;
-
-	    //DESTROY EVERYTHING
-	    game.time.events.add(Phaser.Timer.SECOND * 1, function(){game.sound.stopAll(); 
-	    	for(var i = 0; i < eyes.length; i++) 
-	    	{
-	    		//this.bombPickup(eyes.getAt(i).body.x, eyes.getAt(i).body.y);
-	    		explodeEnd(eyes.getAt(i).body.x, eyes.getAt(i).body.y);
-	    	}; 
-	    	for(var i = 0; i < meteors.length; i++) 
-	    	{
-	    		//this.bombPickup(meteors.getAt(i).body.x, meteors.getAt(i).body.y);
-	    		explodeEnd(meteors.getAt(i).body.x, meteors.getAt(i).body.y);
-	    	};
-	    	eyes.destroy(); meteors.destroy(); bullets.destroy(); game.add.audio('explodes2', 0.1, false).play();}, this);
-
-	    // Make the dragon fly away
-	    game.time.events.add(Phaser.Timer.SECOND * 1.5, function(){
-	    	sprite.inputEnabled = false;
-	    	game.add.tween(sprite).to({y: 0, alpha: 0}, 1500, Phaser.Easing.Linear.None, true);}, this);
-	    // END THE GAME AND PAUSE
-	    game.time.events.add(Phaser.Timer.SECOND * 3, function(){
-	    	scoreText.destroy(); 
-	    	lifeCounter.destroy();
-	    	lifeCount.destroy();
-	    	runTimer.destroy(); 
-	    	pauseButton.destroy();
-	    	shootToggle.destroy(); // REMOVE IF NEEDED
-	    	game.paused = true;
-	    	pauseScreen = game.add.sprite(0, 0, 'pauseScreen'); 
-	    	pauseText   = game.add.bitmapText(game.world.width*0.5, game.world.height*0.2, 'titleFont', "   Level\nComplete!", 40);
-	    	pauseText.anchor.setTo(0.5, 0.5);
-	    	finalscore = game.add.bitmapText(game.world.width*0.5, game.world.height*0.5, 'titleFont', "Final score: " + score, 30);
-	    	finalscore.anchor.setTo(0.5, 0.5);
-	    	nextButton = createButton("Next Level", 10, game.world.width*0.5, game.world.height*0.8, 
-								140, 30, function(){game.paused = false; game.state.start('Game')});
-	    	returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
-								160, 30, function(){game.paused = false; game.state.start('MainMenu')});
-	    	}, this);
 
 
 	    //uncomment this to test an enemy!
@@ -282,6 +258,7 @@ var Game =
 		lifeCounter.text = "X " + lives;
 		if (!timepaused)this.timerTick();
 	    //collision tests
+	    game.physics.arcade.collide(meteors);
 		game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
 	    game.physics.arcade.overlap(screenEdge, meteors,this.enemyOffScreen);
 	    game.physics.arcade.overlap(bullets, meteors, this.bulletHit);
@@ -299,31 +276,6 @@ var Game =
 	{
 		game.debug.text(game.time.fps || '--', 2, 14, "#00ff00"); 
 	},
-	makeEnemy: function() 
-	{	
-		if (Math.random() > 0.2){
-		var x = randomIntFromInterval(0, game.world.width);
-		var xspeed = randomIntFromInterval(-40, 40);
-		var yspeed = randomIntFromInterval(150, 250);
-		this.spawnEnemy("meteors",x, -10, xspeed, yspeed);
-		}else{
-			var mult = 1;
-			if(Math.random()>0.5){var x = -10;}
-			else {mult = -1; var x = game.world.width+10;}
-			var y = randomIntFromInterval(0, game.world.height-60);
-			var xspeed = randomIntFromInterval(75, 200)*mult;
-			var yspeed = randomIntFromInterval(50, 150)*mult;
-			if(Math.random()>0.5) yspeed *=-1;
-			var xaccel = randomIntFromInterval(0, 80)*mult;
-			if(Math.random()>0.5) xaccel *=-1;
-			var yaccel = randomIntFromInterval(0, 80)*mult;
-			if(Math.random()>0.5) yaccel *=-1;
-			if (Math.random() > 0.9){yspeed = 0; xaccel = 0; yaccel = 0;}
-			for(var i=0; i<5; i++){
-	    			game.time.events.add(150*i, function(){that.spawnEnemy("eyes",x, y, xspeed, yspeed, xaccel, yaccel)});
-		}
-		}
-	},
 	pauseTime: function(){
 		function uiFadeIn(object){
 			game.add.tween(object).to({ alpha: 1}, 300, Phaser.Easing.Quadratic.Out, true);
@@ -335,6 +287,10 @@ var Game =
 		var y = hitbox.body.y;
 
 		if (timepaused){
+			eyeHit.allowMultiple = false;
+			eyeDeath.allowMultiple = false;
+			rockHit.allowMultiple = false;
+			rockDeath.allowMultiple = false;
 			game.time.events.remove(resumeTime);
 			clockTick.stop();
 			canShoot = false;
@@ -348,9 +304,9 @@ var Game =
 				uiFadeIn(lifeCount);
 				uiFadeIn(lifeCounter);
 				uiFadeIn(scoreText);
-				meteors.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
-		    	eyes.forEachAlive(function(enemy){that.enemyUnfreeze(enemy)});
-		    	drops.forEachAlive(function(drops){
+				meteors.forEachExists(function(enemy){that.enemyUnfreeze(enemy)});
+		    	eyes.forEachExists(function(enemy){that.enemyUnfreeze(enemy)});
+		    	drops.forEachExists(function(drops){
 		    		if(drops.warudo){
 		    		if(drops.warudo[0] != 0){
 						drops.body.velocity.x = drops.warudo[0];
@@ -362,8 +318,12 @@ var Game =
 			        }
 		    	});7
 		    	canShoot = true;
-				bullets.forEachAlive(function(bullets){bullets.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;});
+				bullets.forEachExists(function(bullets){bullets.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;});
 				spawnTime = game.time.now+3000;
+				eyeHit.allowMultiple = true;
+				eyeDeath.allowMultiple = true;
+				rockHit.allowMultiple = true;
+				rockDeath.allowMultiple = true;
 			}
 			
 		}
@@ -393,10 +353,10 @@ var Game =
 				resumeTime = game.time.events.add(pauseLength*1000, that.pauseTime, this);
 			});
 			spawnTime = game.time.now + 999999;
-			bullets.forEachAlive(function(bullets){game.add.tween(bullets.body.velocity).to( { y:0 }, 1000, Phaser.Easing.Quadratic.Out, true);});
-			drops.forEachAlive(function(drops){that.enemyFreeze(drops)});
-			eyes.forEachAlive(function(enemy){that.enemyFreeze(enemy)});
-			meteors.forEachAlive(function(enemy){that.enemyFreeze(enemy);});
+			bullets.forEachExists(function(bullets){game.add.tween(bullets.body.velocity).to( { y:0 }, 1000, Phaser.Easing.Quadratic.Out, true);});
+			drops.forEachExists(function(drops){that.enemyFreeze(drops)});
+			eyes.forEachExists(function(enemy){that.enemyFreeze(enemy)});
+			meteors.forEachExists(function(enemy){that.enemyFreeze(enemy);});
 		}
 	},
 	enemyFreeze: function(enemy){
@@ -416,6 +376,31 @@ var Game =
 		enemy.body.gravity.y = enemy.warudo[3];
 		enemy.play('fly');
 		that.victimCheck(enemy);
+	},
+	makeEnemy: function() 
+	{	
+		if (Math.random() > 0.2){
+		var x = randomIntFromInterval(0, game.world.width);
+		var xspeed = randomIntFromInterval(-40, 40);
+		var yspeed = randomIntFromInterval(150, 250);
+		this.spawnEnemy("meteors",x, -10, xspeed, yspeed);
+		}else{
+			var mult = 1;
+			if(Math.random()>0.5){var x = -10;}
+			else {mult = -1; var x = game.world.width+10;}
+			var y = randomIntFromInterval(0, game.world.height-60);
+			var xspeed = randomIntFromInterval(75, 200)*mult;
+			var yspeed = randomIntFromInterval(50, 150)*mult;
+			if(Math.random()>0.5) yspeed *=-1;
+			var xaccel = randomIntFromInterval(0, 80)*mult;
+			if(Math.random()>0.5) xaccel *=-1;
+			var yaccel = randomIntFromInterval(0, 80)*mult;
+			if(Math.random()>0.5) yaccel *=-1;
+			if (Math.random() > 0.9){yspeed = 0; xaccel = 0; yaccel = 0;}
+			for(var i=0; i<5; i++){
+	    			game.time.events.add(150*i, function(){that.spawnEnemy("eyes",x, y, xspeed, yspeed, xaccel, yaccel)});
+		}
+		}
 	},
 	spawnEnemy: function(name, x, y, xspeed, yspeed,xaccel, yaccel)
 	{
@@ -489,7 +474,8 @@ var Game =
 	    game.time.events.add(30, function(){victim.tint = 0xFFFFFF});
 	    //check if victim dies
 	    if(!timepaused)that.victimCheck(victim);
-	    
+	    else if(victim.key == "eyes")eyeHit.play();
+	    else if(victim.key == "meteor")rockHit.play();
 	},
 	victimCheck: function(victim){
 	    if(victim.hp <= 0)
@@ -511,8 +497,13 @@ var Game =
 
 	    	 	
 		}
+		else if(victim.key == "eyes")eyeHit.play();
+		else if(victim.key == "meteor")rockHit.play();
+
 	},
 	victimDies: function(victim, scoreGain){
+			if(victim.key == "eyes")eyeDeath.play();
+			else if(victim.key == "meteor")rockDeath.play();
 		    resetFunct(victim);
 		    //reset hp
 		    that.enemyReset(victim);
@@ -536,13 +527,13 @@ var Game =
     				invuln.scale.setTo(0);
     				game.add.tween(invuln.scale).to( {x:1.25, y:1.25}, 150, Phaser.Easing.Linear.None, true);
     				hurtTime = game.time.now + 6000;
-    				invulnEvent = game.time.events.add(6000, function(){invuln.alpha = 0;lives++;that.killFunct();});
+    				invulnEvent = game.time.events.add(6000, function(){invuln.alpha = 0;lives++;that.prepBlink();player.alpha = 1;});
     				break;
 	    	case 1: 	
     				that.bombPickup(player.body.x, player.body.y);
     				break;
 	    	case 2: 	
-    				drops.forEachAlive(function(drops){
+    				drops.forEachExists(function(drops){
     					if (drops.key != "shield") drops.kill();
 			    	});
 			    	that.pauseTime();
@@ -586,6 +577,7 @@ var Game =
 	{
 		//var bigboom = game.add.sprite(x, y, 'bombboom');
 		var boom = bigboom.getFirstExists(false);
+		boomb.play();
 		boom.scale.setTo(0.2);
 		boom.anchor.setTo(0.5);
     	boom.reset(x+5, y+5);
@@ -602,7 +594,7 @@ var Game =
     	if (!timepaused)that.victimDies(enemy, 50);
     },
 	enemyReset: function(enemy){
-	    if(enemy.key == "meteors") enemy.hp = enemyToughness+1;
+	    if(enemy.key == "meteors") enemy.hp = enemyToughness+2;
     	else enemy.hp = enemyToughness;
 		if(enemy.scale.x <0) enemy.scale.x *=-1;
 		enemy.tint = 0xffffff;
@@ -625,12 +617,9 @@ var Game =
 		    {
 			    explodeFunct(sprite.body.x, sprite.body.y);
 			    lives--;
+			    xds.play();
 			    hurtTime = game.time.now + iFrames*1000;
-			    blinkBool = true;
-			    for(i = 1; i <= iFrames*10; i++)
-			    {
-			    	game.time.events.add(100*i, this.spriteBlink);
-			    }
+			    this.prepBlink();
 		    }
 		    if (lives < 0)
 		    {
@@ -638,6 +627,14 @@ var Game =
 			    //sprite.visible = false;
 		    }	
 		}
+	},
+	prepBlink: function()
+	{
+		blinkBool = true;
+	    for(i = 1; i <= iFrames*10; i++)
+	    {
+	    	game.time.events.add(100*i, this.spriteBlink);
+	    }
 	},
 	spriteBlink: function()
 	{
@@ -652,11 +649,62 @@ var Game =
 			blinkBool = !blinkBool;
 		}
 	},
+	destroyEverything: function(){
+		game.sound.stopAll(); 
+		bullets.killAll();
+		drops.killAll();
+		enemyDespawnCounter = 0;
+		removing = game.add.group();
+    	eyes.forEachExists(function(enemy){that.enemyFreeze(enemy);}); 
+    	eyes.moveAll(removing);
+    	meteors.forEachExists(function(enemy){that.enemyFreeze(enemy);}); 
+    	meteors.moveAll(removing);
+    	removing.shuffle();
+    	game.time.events.add(600, function(){
+	    	removing.forEachExists(function(victim){
+	    		game.time.events.add(120*enemyDespawnCounter, function(){
+	    			that.victimDies(victim, 10)}, this);
+    			enemyDespawnCounter++});
+	    });
+	},
+	dragonFlyAway: function(){
+		sprite.inputEnabled = false;
+    	game.add.tween(sprite).to({x: game.world.centerX, y: game.world.centerY*1.8}, 1000, Phaser.Easing.Quadratic.InOut, true);
+    	game.time.events.add(1300, function(){
+    		game.add.tween(sprite).to({y: 0, alpha: 0}, 1200, Phaser.Easing.Quadratic.In, true);}, this);
+	},
+	endLevel: function(){
+		canShoot = false;
+		spawnTime += 9999999;
+		this.destroyEverything();
 
+		game.time.events.add(1000, function(){that.dragonFlyAway()});
+
+	    //END THE GAME AND PAUSE
+	    game.time.events.loop(750, function(){
+	    	if(!removing.getFirstExists()&&sprite.alpha == 0)
+	    	{
+		    	scoreText.kill(); 
+		    	lifeCounter.kill();
+		    	lifeCount.kill();
+		    	runTimer.kill(); 
+		    	pauseButton.kill();
+		    	shootToggle.kill(); // REMOVE IF NEEDED
+		    	this.pauseFunct("   Level\nComplete!", 40, 0xFFFFFF);
+		    	finalscore = game.add.bitmapText(game.world.width*0.5, game.world.height*0.5, 'titleFont', "Final score: " + score, 25);
+		    	finalscore.anchor.setTo(0.5, 0.5);
+		    	nextButton = createButton("Next Level", 10, game.world.width*0.5, game.world.height*0.8, 
+									140, 30, function(){game.paused = false; game.state.start('Game')});
+		    	returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
+									160, 30, function(){game.paused = false; game.state.start('MainMenu')});
+		    }
+	    }, this);
+
+	},
 	gameOver: function()
 	{
 		//console.log("Game over");
-		this.pauseFunct("DEFEAT", 50);
+		this.pauseFunct("DEFEAT", 50, 0xFFFFF);
 		var textFormat = {font:'16px Arial', fill:'#fff'};
 		var highscore = parseInt(Cookies.get("highscore"));
 		if (isNaN(highscore)) highscore = 0;
@@ -693,7 +741,7 @@ var Game =
 		}//if not paused, pause and make menu
 		else
 		{
-			that.pauseFunct("PAUSED!", 50);
+			that.pauseFunct("PAUSED!", 50, 0xFFFFF);
 			resumeBtn = createButton("Resume",10,game.world.width*0.5, game.world.height*0.6,
 							 100, 30, that.pauseMenu);
 			restartBtn = createButton("Restart",10,game.world.width*0.5, game.world.height*0.7,
@@ -704,7 +752,7 @@ var Game =
 		}
 	},
 	//if paused, unpause and remove pause screen
-	pauseFunct: function(string, fontsize, x, y)
+	pauseFunct: function(string, fontsize, tint, x, y)
 	{
 		if(game.paused)
 		{
@@ -739,8 +787,7 @@ var Game =
 		}
 		pauseScreen = game.add.sprite(0, 0, 'pauseScreen');
 		pauseText   = game.add.bitmapText(textX, textY, 'titleFont', string, 40);
-		//game.add.text(textX, textY, string, {font:50 + "px Verdana", fill:"#FFF", align:"center"});
-		pauseText.tint = 0xFFFFF;
+		pauseText.tint = tint;
 		pauseText.anchor.setTo(0.5, 0.5);
 		}
 	},
@@ -768,23 +815,10 @@ function explodeFunct(x, y)
     	explosion.reset(x, y);
    		explosion.scale.setTo(0.3);
     	explosion.alpha = 0.5;
-    	xds = game.add.audio('explodes2', 0.1, false);
-    	xds.play();
     	explosion.play('explode', 30, false, true);
 	}
 }
 
-function explodeEnd(x, y)
-{
-	var explosion = explosions.getFirstExists(false);
-	if (explosion)
-	{
-    	explosion.reset(x, y);
-   		explosion.scale.setTo(0.3);
-    	explosion.alpha = 0.5;
-    	explosion.play('explode', 30, false, true);
-	}
-}
 
 
 function resetFunct(object)
