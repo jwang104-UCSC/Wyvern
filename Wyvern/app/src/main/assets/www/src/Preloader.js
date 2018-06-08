@@ -41,10 +41,15 @@ var Preloader = {
 		game.load.audio('warudoSFX', 'sfx/Za Warudo.mp3');
 		game.load.audio('warudoEndSFX', 'sfx/Warudo End.ogg');
 		game.load.audio('clockTick', 'sfx/clockTick.ogg');
-		game.load.audio('hit', 'sfx/384 hit.wav');
-		game.load.audio('death', 'sfx/383 death.wav');
+		game.load.audio('eyehit', 'sfx/384 hit.wav');
+		game.load.audio('eyedeath', 'sfx/383 death.wav');
 		game.load.audio('rockhit', 'sfx/355 hit.wav');
 		game.load.audio('rockdeath', 'sfx/354 death.wav');
+		game.load.audio('shieldUp', 'sfx/091 charge up.wav');
+		game.load.audio('shieldTouch', 'sfx/125 ping.wav');
+		game.load.audio('shieldDown', 'sfx/092 discharge.wav');
+		game.load.audio('hurt', 'sfx/884 hurt.wav');
+		
 		
 
 		game.load.audio('explodes', 'sfx/063 explode.wav');

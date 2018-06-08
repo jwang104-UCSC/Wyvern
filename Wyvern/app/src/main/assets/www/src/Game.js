@@ -6,32 +6,32 @@ var Game =
 			 Math.seedrandom(seed);
 		else Math.seedrandom();
 		game.stage.smoothed = false;
-		//game.stage.disableVisibilityChange = true;
 		game.time.advancedTiming = true;
 		that = this;
 		verbose = false;
+
 		//Setup gameplay variables here
-		timepaused = false;
 		pauseLength = 4;
 		shootRateMultiplier = 1;
 		baseShotSpeed = -200;
 		shotSpeedMultiplier = 1;
 		dropRate = 0.05;
-
-		/* For the FIRST level, there probably won't be upgrades.
-		   Check if we've setup the variables first, otherwise
-		   we use the modified variables in Shop.js
-		*/
-
-		shotSpread = parseInt(Cookies.get("shotSpread"));
-		if (isNaN(shotSpread)) 
-		{
-			shotSpread = 1;
-			Cookies.set('shotSpread', shotSpread);
-		}
-
 		iFrames = 1;
+
+		spawnTime = 0;
+		spawnDelay = 200;
+		bulletTime = 0;
+		firingTime = 0;
+		hurtTime = 0;
+		canShoot = true;
+		timepaused = false;
+		invulnerable = false;
+		levelEnding = false;
+
+		enemyToughness = 2;
+		lifeUpCounter = 0;
 		score = 0;
+
 
 		// Save the lives as a cookie
 		lives = parseInt(Cookies.get("lives"));
@@ -41,41 +41,41 @@ var Game =
 			Cookies.set('lives', lives);
 		}
 
-		spawnTime = 0;
-		bulletTime = 0;
-		firingTime = 0;
-		canShoot = true;
-		hurtTime = 0;
-		
-
-		enemyToughness = 2;
-		enemiesKilled = 0;
-		spawnDelay = 200;
+		shotSpread = parseInt(Cookies.get("shotSpread"));
+		if (isNaN(shotSpread)) 
+		{
+			shotSpread = 1;
+			Cookies.set('shotSpread', shotSpread);
+		}
 		//gameplay-related vars end
 
 		//background music & sound effects
-		//comment out the music for testing if you want
-		//volume is 0.2, loop is true
 		bgm = game.add.audio('cosmosBGM', 0.2, true);
 		warudo = game.add.audio('warudoSFX', 0.7);
 		warudoEnd = game.add.audio('warudoEndSFX', 1);
 		clockTick = game.add.audio('clockTick', 0.3, true);
-		xds = game.add.audio('explodes2', 0.2);
-		xds.allowMultiple = true;
+		xds = game.add.audio('explodes2', 0.35);
 		boomb = game.add.audio('explodes', 0.2);
-		boomb.allowMultiple = true;
-		eyeHit = game.add.audio('hit', 0.1);
-		eyeHit.allowMultiple = true;
-		eyeDeath = game.add.audio('death', 0.1);
-		eyeDeath.allowMultiple = true;
+		eyeHit = game.add.audio('eyehit', 0.1);
+		eyeDeath = game.add.audio('eyedeath', 0.1);
 		rockHit = game.add.audio('rockhit', 0.1);
-		rockHit.allowMultiple = true;
 		rockDeath = game.add.audio('rockdeath', 0.1);
-		rockDeath.allowMultiple = true;
+		shieldUp = game.add.audio('shieldUp', 0.15);
+		shieldTouch = game.add.audio('shieldTouch', 0.1);
+		shieldDown = game.add.audio('shieldDown', 0.15);
+		playerHurt = game.add.audio('hurt', 0.15);
+		
+		
+		sfxGroup = {xds, boomb, eyeHit, eyeDeath, rockHit, rockDeath, shieldUp, shieldTouch, shieldDown, playerHurt};
+		for(var i = 0; i < sfxGroup.length; i++){
+			sfxGroup[i].allowMultiple = true;
+		}
 		bgm.play();
+
 		//background
 		back = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
 		back.tint = 0x808080;
+
 		//makes bullets
 	 	bullets = game.add.group();
 	    bullets.enableBody = true;
@@ -116,7 +116,6 @@ var Game =
 	    }
 
 		//makes enemies
-		//enemies = game.add.group();
 		eyes = game.add.group();
 	    meteors = game.add.group();
 
@@ -136,7 +135,6 @@ var Game =
 	        e.worth = 100;
 	    }
 
-
 		meteors.enableBody = true;
 		meteors.physicsBodyType = Phaser.Physics.ARCADE;
 	    for (var i = 0; i < 100; i++)
@@ -152,8 +150,6 @@ var Game =
 	        e.hp = enemyToughness+2;
 	        e.worth = 50;
 	    }
-	    // enemies.add(eyes);
-	    // enemies.add(meteors);
 
 		//make a barrier off the edges of screen to despawn offscreen enemies
 		screenEdge = game.add.group();
@@ -187,7 +183,6 @@ var Game =
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 		sprite.body.collideWorldBounds = true;
 		
-
 		//make explosions
 	    explosions = game.add.group();
 	    explosions.createMultiple(200, 'explode');
@@ -200,7 +195,6 @@ var Game =
 	    bigboom.enableBody = true;
 	    bigboom.createMultiple(100, 'bombboom');
 
-		//These coord offsets are probably all wrong once we get real sprites
 		//UI
 		runTimerStart = new Date();
 		runTimerPaused = 0;
@@ -215,35 +209,16 @@ var Game =
 	    lifeCount.scale.setTo(0.2);
 	    lifeCounter = game.add.text(lifeCount.width , game.world.height - lifeCount.height,
 	    				 'X ' + lives, { font: '16px Arial', fill: '#fff'});
-	    //lifeCount.anchor.setTo(0.5,0.5);
 	    //pause button
 	    pauseButton = game.add.button(game.world.width - 25, 5, 'pauseBtn', this.pauseMenu);
 	    pauseButton.scale.setTo(0.6, 0.6);
 	    //shooting toggle AKA debug button make it do whatever you want for testing
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
-
 	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
-	    	//function(){that.bombPickup(hitbox.body.x, hitbox.body.y)});
-	    	//function(){that.makeDrops(100, 100, 2)});
 	    	function(){that.endLevel()});
 
-	    	//function(){explodeFunct(game.world.width*0.5, 150);});
-	    	//function(){sprite.alpha = 1;});
-	    	//function(){that.spawnEnemy("meteors",game.world.width*0.5, 150, 0, 0);});
-	    	// function(){
-	    	// 	for(var i=0; i<5; i++){
-	    	// 		game.time.events.add(150*i, function(){that.spawnEnemy("meteors", -10, 220, 150, 0, -200, -100)});
-	    	// 	}
-	    		
-	    	// });
-	    	
 	    shootToggle.scale.setTo(0.6, 0.6);
 	    shootToggle.tint = 0xff0000;
-
-
-	    //uncomment this to test an enemy!
-	    //this.spawnEnemy("eyes",game.world.width*0.5, 150, 0, 0);
-	    //explodeFunct(game.world.width*0.5, 150);
 	},
 
 	update: function() 
@@ -468,6 +443,7 @@ var Game =
 		//remove the shot sprite
 		resetFunct(shot);
 		score++;
+		lifeUpCounter ++;
 	    victim.hp--;
 	    victim.tint = 0xFF0000;
 	    //change tint back after delay in millisecond
@@ -481,12 +457,6 @@ var Game =
 	    if(victim.hp <= 0)
 	    {
 	    	that.victimDies(victim, victim.worth);
-	    	enemiesKilled += victim.worth/100;
-		    if(enemiesKilled%20==0)
-		    {
-		    	lives++;
-		    }
-
 		    //rng to check if an item drops
 		     if (Math.random() < dropRate){
 		     	//if pass the check twice, drop the rarer timestop power
@@ -509,8 +479,21 @@ var Game =
 		    that.enemyReset(victim);
 		    //Increase the score
 		    score += scoreGain;
+	    	lifeUpCounter += scoreGain;
+		    if(lifeUpCounter>5000)
+		    {
+		    	this.livesUp();
+		    	lifeUpCounter = 0;
+		    }
 		    if(scoreGain != 0) textPop(scoreGain.toString(), victim.body.x, victim.body.y);
 		    explodeFunct(victim.body.x, victim.body.y);
+	},
+	livesUp: function(){
+    	if(!levelEnding){
+			var pop = textPop("1-up", lifeCounter.x, lifeCounter.y-15);
+			pop.forEachExists(function(letter){letter.tint = 0x00ffff}, this);
+			game.time.events.add(1000, function(){lives++});
+		}
 	},
 	itemPickup: function(player, drop) {
 		if (!(typeof drop.timer === "undefined"))
@@ -525,9 +508,20 @@ var Game =
     						game.time.events.remove(invulnEvent);
     				invuln.alpha=0.8;
     				invuln.scale.setTo(0);
+    				shieldUp.play();
+    				canShoot = false;
     				game.add.tween(invuln.scale).to( {x:1.25, y:1.25}, 150, Phaser.Easing.Linear.None, true);
     				hurtTime = game.time.now + 6000;
-    				invulnEvent = game.time.events.add(6000, function(){invuln.alpha = 0;lives++;that.prepBlink();player.alpha = 1;});
+    				invulnerable = true;
+    				invulnEvent = game.time.events.add(6000, function(){
+    					shieldDown.play();
+    					invuln.alpha = 0;
+    					invulnerable = false;
+    					that.prepBlink();
+    					hurtTime = game.time.now + iFrames*1000;
+    					player.alpha = 1;
+    					canShoot = true;
+    				});
     				break;
 	    	case 1: 	
     				that.bombPickup(player.body.x, player.body.y);
@@ -603,6 +597,11 @@ var Game =
 	},
 	enemyTouched: function(player, enemy) 
 	{
+    	if(invulnerable){
+    		that.victimDies(enemy, 50);
+    		shieldTouch.play();
+    		return;
+    	}
     	if(!timepaused){
     		that.killFunct();
     		that.enemyReset(enemy);
@@ -617,7 +616,7 @@ var Game =
 		    {
 			    explodeFunct(sprite.body.x, sprite.body.y);
 			    lives--;
-			    xds.play();
+			    playerHurt.play();
 			    hurtTime = game.time.now + iFrames*1000;
 			    this.prepBlink();
 		    }
@@ -674,6 +673,7 @@ var Game =
     		game.add.tween(sprite).to({y: 0, alpha: 0}, 1200, Phaser.Easing.Quadratic.In, true);}, this);
 	},
 	endLevel: function(){
+		levelEnding = true;
 		canShoot = false;
 		spawnTime += 9999999;
 		this.destroyEverything();
