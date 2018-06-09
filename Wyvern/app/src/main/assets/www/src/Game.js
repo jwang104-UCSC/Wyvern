@@ -744,7 +744,7 @@ var Game =
 
 		game.sound.stopAll();
 		retryButton = createButton("Retry", 10, game.world.width*0.5, game.world.height*0.7,
-						 100, 30, function(){game.state.restart(); game.paused = false;});
+						 100, 30, function(){game.paused = false; runTimerPaused +=game.time.pauseDuration; game.state.restart();});
 		exitButton  = createButton("Main Menu", 10, game.world.width*0.5, game.world.height*0.8,
 						 175, 30, function(){game.state.start('MainMenu'); game.paused = false; bgm.stop();});
 		//game.paused = true;
@@ -767,7 +767,8 @@ var Game =
 			resumeBtn = createButton("Resume",10,game.world.width*0.5, game.world.height*0.6,
 							 100, 30, that.pauseMenu);
 			restartBtn = createButton("Restart",10,game.world.width*0.5, game.world.height*0.7,
-							 100, 30, function(){game.state.restart(); game.sound.stopAll(); game.paused = false;});
+							 100, 30, function(){game.sound.stopAll(); game.paused = false; runTimerPaused +=game.time.pauseDuration;
+							 						game.state.restart();});
 			menuBtn = createButton("Menu",10,game.world.width*0.5, game.world.height*0.8,
 							 100, 30, function(){game.state.start('MainMenu'); game.paused = false; bgm.stop();});
 
