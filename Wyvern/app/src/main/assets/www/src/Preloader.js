@@ -54,8 +54,7 @@ var Preloader = {
 		
 		
 
-		game.load.audio('explodes', 'sfx/063 explode.wav');
-		game.load.audio('explodes2', 'sfx/explosion.mp3');
+		game.load.audio('explosionSFX', 'sfx/063 explode.wav');
 		
 
 		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
@@ -68,7 +67,7 @@ var Preloader = {
 		game.add.plugin(PhaserInput.Plugin);
 		//loads right into the game because I'm tired of clicking the menu away
 		//game.state.start("Game");
-		//game.state.start("Shop");
-		game.state.start("Hub");
+		game.state.start("Shop");
+		//game.state.start("Hub");
 	}
 }

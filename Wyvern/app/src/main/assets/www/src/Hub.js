@@ -11,38 +11,38 @@ var Hub =
 		txt.anchor.setTo(0.5,0.5);
 		txt2.anchor.setTo(0.5,0.5);
 	    lv1 = {
-	    	"level":1,
-	    	"bgm":"cosmosBGM",
+	    	"level": 1,
+	    	"bgm": "cosmosBGM",
 	    	"makeEnemy%": 0.5,
 	    	"Enemy Type 1": "meteors",
-	    	"Enemy Type 2":"eyes",
+	    	"Enemy Type 2": "eyes",
 	    	"spawnDelay": 200,
-	    	"enemyToughness":2,
-	    	"score":0,
-	    	"lives":3
+	    	"enemyToughness": 2,
+	    	"score": 0,
+	    	"lives": 3
 		};
 	    lv2 = {
-	    	"level":2,
-	    	"bgm":"gunsBGM",
+	    	"level": 2,
+	    	"bgm": "gunsBGM",
 	    	"makeEnemy%": 0.7,
 	    	"Enemy Type 1": "meteors",
-	    	"Enemy Type 2":"meteors",
+	    	"Enemy Type 2": "meteors",
 	    	"spawnDelay": 150,
-	    	"enemyToughness":1,
-	    	"score":0,
-	    	"lives":3
+	    	"enemyToughness": 1,
+	    	"score": 0,
+	    	"lives": 3
 	    };
 	    //placeholder, good luck lol
 	    lv3 = {
-	    	"level":3,
-	    	"bgm":"gunsBGM",
+	    	"level": 3,
+	    	"bgm": "gunsBGM",
 	    	"makeEnemy%": 0.7,
 	    	"Enemy Type 1": "meteors",
-	    	"Enemy Type 2":"meteors",
+	    	"Enemy Type 2": "meteors",
 	    	"spawnDelay": 20,
-	    	"enemyToughness":0,
-	    	"score":0,
-	    	"lives":3
+	    	"enemyToughness": 0,
+	    	"score": 0,
+	    	"lives": 3
 	    };
 		Level1 = createButton("Level 1", 10, game.world.width*0.4, game.world.height*0.4, 
 								140, 30, function(){

@@ -14,7 +14,7 @@ var Settings =
 		});
 		input.setText("Type seed here");
 
-		setSeed   = createButton("Set Custom Seed", 10, game.world.width*0.5, game.world.height*0.4, 
+		setSeed      = createButton("Set Custom Seed", 10, game.world.width*0.5, game.world.height*0.4, 
 								200, 30, function(){if (input.value != "Type seed here")Cookies.set("seed", input.value)});
 		removeSeed   = createButton("Clear Custom Seed", 9, game.world.width*0.5, game.world.height*0.5, 
 								200, 30, function(){Cookies.remove("seed")});

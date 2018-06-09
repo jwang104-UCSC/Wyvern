@@ -2,7 +2,7 @@ var Shop =
 {
 	create: function()
 	{
-		game.add.sprite(-300, 0, 'nice');
+		game.add.sprite(-300, 0, 'shop-bg');
 
 		//Custom green text
 		var txt = game.add.bitmapText(game.world.width*0.5, game.world.height*0.1, 'titleFont', "UPGRADES", 40);
@@ -22,12 +22,14 @@ var Shop =
 	//Copy paste upgrade functions
 	livesPlus: function()
 	{	
-		tempLives = parseInt(Cookies.get("lives"));
-		console.log("lives: ", tempLives);
+		tempLives = parseInt(Cookies.get("bonus lives"));
+		if(isNaN(tempLives))
+			tempLives = 0;
 		if (tempLives < 20)
 		{
 			textRise("      Life\n Increased!", game.world.centerX*0.15, game.world.centerY*0.6);
-			Cookies.set('lives', ++tempLives); 
+			Cookies.set('bonus lives', ++tempLives); 
+			console.log("Bonus Lives: ", tempLives);
 		}
 		else
 		{
@@ -37,12 +39,14 @@ var Shop =
 
 	spreadPlus: function()
 	{
-		tempSpread = parseInt(Cookies.get("shotSpread"));
-		console.log("Spread: ", tempSpread);
-		if (tempSpread < 3)
+		tempSpread = parseInt(Cookies.get("bonus spread"));
+		if(isNaN(tempSpread))
+			tempSpread = 0;
+		if (tempSpread < 2)
 		{
 			textRise("Shot Spread\n Increased!", game.world.centerX*0.15, game.world.centerY*0.6);
-			Cookies.set('shotSpread', ++tempSpread); 
+			Cookies.set('bonus spread', ++tempSpread); 
+			console.log("Bonus Spread: ", tempSpread);
 		}
 		else
 		{
@@ -52,8 +56,20 @@ var Shop =
 
 	shieldPlus: function()
 	{
-		//shotSpread++;
-		textRise("Shield Power Increased!", game.world.centerX, game.world.centerY*0.9);
+		tempShield = parseInt(Cookies.get("bonus shield"));
+		if(isNaN(tempShield))
+			tempShield = 0;
+		if (tempShield < 3000)
+		{
+			tempShield += 10000;
+			textRise("Shield\n Increased!", game.world.centerX*0.15, game.world.centerY*0.6);
+			Cookies.set('bonus shield', tempShield); 
+			console.log("Bonus Shielding Duration: ", tempShield);
+		}
+		else
+		{
+			textRise("    Fully\nupgraded!", game.world.centerX*0.3, game.world.centerY*0.6);
+		}
 	}
 }
 function textRise(string, x, y){
