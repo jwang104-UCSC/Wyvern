@@ -49,29 +49,19 @@ var Game =
 	    bigboom.createMultiple(100, 'bombboom');
 
 		this.uiSetup();
+		this.prompter();
 
-	    gameStart = false;
-	    duration = 2000;
-
-		game.time.events.add(0, function(){
-
-		textY = game.world.centerY*0.5;
-
-		levelText = game.add.bitmapText(game.world.width*0.51, textY, 'buttonStyle', "Level " + levelSettings["level"], 10);
-		goalText = game.add.bitmapText(game.world.width*0.51, game.world.centerY*0.65, 'buttonStyle', levelSettings["objective"], 8);
-		levelText.tint = 0x00FFFF;
-		levelText.anchor.setTo(0.5, 0.5);
-		goalText.anchor.setTo(0.5, 0.5);
-		});
-		game.time.events.add(duration, function(){
-			gameStart = true;
-			levelText.kill();
-			goalText.kill();
-		});
+		//Makes it so that the endLevel() function doesn't run more than once
+		endCondition = 0;
 	},
 
 	update: function() 
 	{
+		if (score >= 5000 && endCondition == 0)
+		{
+			this.endLevel();
+			endCondition++;
+		}
 	    if (!timepaused) background.tilePosition.y += 2;
 		if (game.time.now > spawnTime && gameStart == true) this.makeEnemy();
 		this.fireBullet();
@@ -80,6 +70,7 @@ var Game =
 		scoreText.text = "Score:" + score;
 		lifeCounter.text = "x" + lives;
 		if (!timepaused && gameStart == true) this.timerTick();
+
 	    //Collision tests
 	    game.physics.arcade.collide(meteors);
 		game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
@@ -227,6 +218,27 @@ var Game =
 	    function(){that.endLevel()});
 	    shootToggle.scale.setTo(0.8, 0.8);
 	    shootToggle.tint = 0xff0000;
+	},
+
+	//Controls the display at the start of the level
+	prompter: function()
+	{
+		gameStart = false;
+	    duration = 2000;
+
+		game.time.events.add(0, function(){
+			textY = game.world.centerY*0.5;
+			levelText = game.add.bitmapText(game.world.width*0.51, textY, 'buttonStyle', "Level " + levelSettings["level"], 10);
+			goalText = game.add.bitmapText(game.world.width*0.51, game.world.centerY*0.65, 'buttonStyle', levelSettings["objective"], 8);
+			levelText.tint = 0x00FFFF;
+			levelText.anchor.setTo(0.5, 0.5);
+			goalText.anchor.setTo(0.5, 0.5);
+		});
+		game.time.events.add(duration, function(){
+			gameStart = true;
+			levelText.kill();
+			goalText.kill();
+		});
 	},
 
 	//Create barriers on the edges of the screen to despawn offscreen enemies
@@ -826,9 +838,10 @@ var Game =
 	    game.time.events.loop(750, function(){
 	    	if(!removing.getFirstExists() && sprite.alpha == 0)
 	    	{
-	    		tempCurrency = parseInt(Cookies.get("currency"));
-	    		Cookies.set("currency", tempCurrency + score);
-	    		console.log("nice", tempCurrency);
+	    		tempCredits = parseInt(Cookies.get("credits"));
+	    		if (isNaN(tempCredits)) tempCredits = 0;
+	    		Cookies.set("credits", tempCredits + score);
+	    		console.log("nice", tempCredits);
 		    	scoreText.kill(); 
 		    	lifeCounter.kill();
 		    	lifeIcon.kill();
