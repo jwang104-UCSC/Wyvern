@@ -529,17 +529,22 @@ var Game =
     	if (game.time.now > bulletTime) 
     	{
     		shootDelay = 200 / shootRateMultiplier;
-            for (var i = 0; i < shotSpread; i++) 
+    		var shotOffsetX;
+    		switch(shotSpread)
+    		{
+    			case 1: shotOffsetX = [0]; break;
+				case 2: shotOffsetX = [-10, 10]; break;
+				case 3: shotOffsetX = [-10, 0, 10]; break;
+				case 4: shotOffsetX = [-15, -5, 5, 15]; break;
+				case 5: shotOffsetX = [-15, -7, 0, 7, 15]; break;
+				default: shotOffsetX = [0];
+    		}
+        	for (var i = 0; i < shotSpread; i++) 
             {
                 var bullet = bullets.getFirstExists(false);
                 if (bullet) 
-                {
-                    bullet.reset(sprite.x, sprite.y - 25);
-                    var spreadAngle = 90/shotSpread;
-                    //decide how many bullets to shoot on each side
-                    var k = Math.floor(shotSpread/2); 
-                    var angle = k*spreadAngle - i*spreadAngle;
-                    game.physics.arcade.velocityFromAngle(angle - 90, 40*shotSpread + 10, bullet.body.velocity);
+                {	
+                    bullet.reset(sprite.x + shotOffsetX[i], sprite.y - 25);
                     bullet.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;
                     if (timepaused){
                     	var tween = game.add.tween(bullet.body.velocity).to( { y:0 }, 1000, Phaser.Easing.Quadratic.Out, true);
