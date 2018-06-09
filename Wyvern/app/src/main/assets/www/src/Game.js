@@ -49,25 +49,7 @@ var Game =
 	    bigboom.createMultiple(100, 'bombboom');
 
 		this.uiSetup();
-
-	    gameStart = false;
-	    duration = 2000;
-
-		game.time.events.add(0, function(){
-
-		textY = game.world.centerY*0.5;
-
-		levelText = game.add.bitmapText(game.world.width*0.51, textY, 'buttonStyle', "Level " + levelSettings["level"], 10);
-		goalText = game.add.bitmapText(game.world.width*0.51, game.world.centerY*0.65, 'buttonStyle', levelSettings["objective"], 8);
-		levelText.tint = 0x00FFFF;
-		levelText.anchor.setTo(0.5, 0.5);
-		goalText.anchor.setTo(0.5, 0.5);
-		});
-		game.time.events.add(duration, function(){
-			gameStart = true;
-			levelText.kill();
-			goalText.kill();
-		});
+		this.prompter();
 
 		//Makes it so that the endLevel() function doesn't run more than once
 		endCondition = 0;
@@ -236,6 +218,27 @@ var Game =
 	    function(){that.endLevel()});
 	    shootToggle.scale.setTo(0.8, 0.8);
 	    shootToggle.tint = 0xff0000;
+	},
+
+	//Controls the display at the start of the level
+	prompter: function()
+	{
+		gameStart = false;
+	    duration = 2000;
+
+		game.time.events.add(0, function(){
+			textY = game.world.centerY*0.5;
+			levelText = game.add.bitmapText(game.world.width*0.51, textY, 'buttonStyle', "Level " + levelSettings["level"], 10);
+			goalText = game.add.bitmapText(game.world.width*0.51, game.world.centerY*0.65, 'buttonStyle', levelSettings["objective"], 8);
+			levelText.tint = 0x00FFFF;
+			levelText.anchor.setTo(0.5, 0.5);
+			goalText.anchor.setTo(0.5, 0.5);
+		});
+		game.time.events.add(duration, function(){
+			gameStart = true;
+			levelText.kill();
+			goalText.kill();
+		});
 	},
 
 	//Create barriers on the edges of the screen to despawn offscreen enemies
@@ -831,6 +834,7 @@ var Game =
 	    	if(!removing.getFirstExists() && sprite.alpha == 0)
 	    	{
 	    		tempCredits = parseInt(Cookies.get("credits"));
+	    		if (isNaN(tempCredits)) tempCredits = 0;
 	    		Cookies.set("credits", tempCredits + score);
 	    		console.log("nice", tempCredits);
 		    	scoreText.kill(); 

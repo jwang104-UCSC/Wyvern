@@ -4,13 +4,24 @@ var Shop =
 	{
 		game.add.sprite(-300, 0, 'shop-bg');
 
+		//Load in all the cookies
+		tempLives  = parseInt(Cookies.get("bonus lives"));
+		tempShield = parseInt(Cookies.get("bonus shield"));
+		tempSpread = parseInt(Cookies.get("bonus spread"));
+		credits    = parseInt(Cookies.get("credits"));
+
+		//Check if the cookies exist
+		if (isNaN(tempLives)) tempLives = 0;
+		if (isNaN(tempShield)) tempShield = 0;
+		if (isNaN(tempSpread)) tempSpread = 0;
+		if (isNaN(credits)) credits = 0;
+
 		//Shop title text
 		var shopText = game.add.bitmapText(game.world.width*0.5, game.world.height*0.1, 'titleFont', "UPGRADES", 40);
 		shopText.tint = 0xFFFFF;
 		shopText.anchor.setTo(0.5, 0.5);
 
 		//Display credits
-		credits = parseInt(Cookies.get("credits"));
 		this.creditsDisplay();
 
 		//Add buttons
@@ -35,8 +46,6 @@ var Shop =
 	//C-pasted upgrade functions
 	livesPlus: function()
 	{	
-		tempLives = parseInt(Cookies.get("bonus lives"));
-
 		//Check for maximum upgrades and sufficient credits
 		if (tempLives < 20)
 		{
@@ -65,7 +74,6 @@ var Shop =
 
 	spreadPlus: function()
 	{
-		tempSpread = parseInt(Cookies.get("bonus spread"));
 		if (tempSpread < 2)
 		{
 			if(credits >= 1000)
@@ -93,7 +101,6 @@ var Shop =
 
 	shieldPlus: function()
 	{
-		tempShield = parseInt(Cookies.get("bonus shield"));
 		if (tempShield < 8000)
 		{
 			if(credits >= 1000)
