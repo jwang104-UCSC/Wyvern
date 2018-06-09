@@ -68,10 +68,18 @@ var Game =
 			levelText.kill();
 			goalText.kill();
 		});
+
+		//Makes it so that the endLevel() function doesn't run more than once
+		endCondition = 0;
 	},
 
 	update: function() 
 	{
+		if (score >= 5000 && endCondition == 0)
+		{
+			this.endLevel();
+			endCondition++;
+		}
 	    if (!timepaused) background.tilePosition.y += 2;
 		if (game.time.now > spawnTime && gameStart == true) this.makeEnemy();
 		this.fireBullet();
@@ -80,6 +88,7 @@ var Game =
 		scoreText.text = "Score:" + score;
 		lifeCounter.text = "x" + lives;
 		if (!timepaused && gameStart == true) this.timerTick();
+
 	    //Collision tests
 	    game.physics.arcade.collide(meteors);
 		game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
@@ -821,9 +830,9 @@ var Game =
 	    game.time.events.loop(750, function(){
 	    	if(!removing.getFirstExists() && sprite.alpha == 0)
 	    	{
-	    		tempCurrency = parseInt(Cookies.get("currency"));
-	    		Cookies.set("currency", tempCurrency + score);
-	    		console.log("nice", tempCurrency);
+	    		tempCredits = parseInt(Cookies.get("credits"));
+	    		Cookies.set("credits", tempCredits + score);
+	    		console.log("nice", tempCredits);
 		    	scoreText.kill(); 
 		    	lifeCounter.kill();
 		    	lifeIcon.kill();

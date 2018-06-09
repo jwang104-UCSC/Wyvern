@@ -9,7 +9,6 @@ var Preloader = {
 		game.load.image('screen-bg', 'img/screen-bg.png');
 		game.load.image('shop-bg', 'img/shop-bg.jpg');
 		game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
-		//game.load.image('redsky', 'img/redsky.jpg');
 		game.load.image('redsky', 'img/redskyloop.png');
 		game.load.image('pauseScreen', 'img/pause-screen.png');
 
@@ -20,7 +19,6 @@ var Preloader = {
 		game.load.image('bombboom', 'img/redring.png');
 
 		game.load.image('invuln', 'img/invuln2.png');
-		//game.load.image('enemy', 'img/bat.png');
 		game.load.image('bullet', 'img/bullet.png');
 		game.load.image('dragon', 'img/dragon.png');
 		game.load.image('fireball', 'img/fireball.png');
@@ -33,7 +31,7 @@ var Preloader = {
 		
 		game.load.bitmapFont('buttonStyle', 'img/carrier_command.png', 'img/carrier_command.xml');
 		game.load.bitmapFont('titleFont', 'img/desyrel.png', 'img/desyrel.xml');
-		game.load.bitmapFont('xsa', 'img/shortStack.png', 'img/shortStack.xml');
+		game.load.bitmapFont('bubbleFont', 'img/shortStack.png', 'img/shortStack.xml');
 
 
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
@@ -65,7 +63,7 @@ var Preloader = {
 	create: function()
 	{
 		game.add.plugin(PhaserInput.Plugin);
-		Cookies.set("currency", 0);
+		Cookies.set("credits", 10000);
 		Cookies.set("bonus lives", 0);
 		Cookies.set("bonus spread", 0);
 		Cookies.set("bonus shield", 0);
