@@ -65,6 +65,10 @@ var Preloader = {
 	create: function()
 	{
 		game.add.plugin(PhaserInput.Plugin);
+		Cookies.set("currency", 0);
+		Cookies.set("bonus lives", 0);
+		Cookies.set("bonus spread", 0);
+		Cookies.set("bonus shield", 0);
 		//loads right into the game because I'm tired of clicking the menu away
 		//game.state.start("Game");
 		game.state.start("Shop");

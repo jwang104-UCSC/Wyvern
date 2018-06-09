@@ -31,7 +31,7 @@ var Game =
 		sprite.addChild(hitbox);
 		sprite.addChild(invuln);
 		hitbox.anchor.setTo(0.5, 0.5);
-		sprite.inputEnabled = true;
+		sprite.inputEnabled = true; 
 		sprite.input.enableDrag(true);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
 		sprite.body.collideWorldBounds = true;
@@ -48,44 +48,38 @@ var Game =
 	    bigboom.enableBody = true;
 	    bigboom.createMultiple(100, 'bombboom');
 
-		//UI
-		if (typeof levelSettings["TimerStart"] === "undefined") runTimerStart = new Date();
-		else runTimerStart = levelSettings["TimerStart"];
-		if (typeof levelSettings["TimerPaused"] === "undefined") runTimerPaused = 0;
-		else runTimerPaused = levelSettings["TimerPaused"];
-		runTimerString = "00:00.00";
-		runTimer = game.add.text(game.world.width, game.world.height - 25, runTimerString, 
-					{font:'16px Arial', fill:'#fff', align:"right"});
-		runTimer.anchor.setTo(1, 0);
-		scoreString = 'Score: ';
-		scoreText = game.add.text(5, 5, scoreString + score, {font:'16px Arial', fill:'#fff'});
-		//lives
-		lifeCount = game.add.sprite(0, game.world.height - sprite.height+9, 'dragon');
-	    lifeCount.scale.setTo(0.2);
-	    lifeCounter = game.add.text(lifeCount.width , game.world.height - lifeCount.height,
-	    				 'X ' + lives, { font: '16px Arial', fill: '#fff'});
-	    //pause button
-	    pauseButton = game.add.button(game.world.width - 25, 5, 'pauseBtn', this.pauseMenu);
-	    pauseButton.scale.setTo(0.6, 0.6);
-	    //shooting toggle AKA debug button make it do whatever you want for testing
-	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
-	    	//function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
-	    	function(){that.endLevel()});
+		this.uiSetup();
 
-	    shootToggle.scale.setTo(0.6, 0.6);
-	    shootToggle.tint = 0xff0000;
+	    gameStart = false;
+	    duration = 2000;
+
+		game.time.events.add(0, function(){
+
+		textY = game.world.centerY*0.5;
+
+		levelText = game.add.bitmapText(game.world.width*0.51, textY, 'buttonStyle', "Level " + levelSettings["level"], 10);
+		goalText = game.add.bitmapText(game.world.width*0.51, game.world.centerY*0.65, 'buttonStyle', levelSettings["objective"], 8);
+		levelText.tint = 0x00FFFF;
+		levelText.anchor.setTo(0.5, 0.5);
+		goalText.anchor.setTo(0.5, 0.5);
+		});
+		game.time.events.add(duration, function(){
+			gameStart = true;
+			levelText.kill();
+			goalText.kill();
+		});
 	},
 
 	update: function() 
 	{
-	    if (!timepaused)background.tilePosition.y += 2;
-		if (game.time.now > spawnTime) this.makeEnemy();
+	    if (!timepaused) background.tilePosition.y += 2;
+		if (game.time.now > spawnTime && gameStart == true) this.makeEnemy();
 		this.fireBullet();
 
 		//Updates the UI counters
-		scoreText.text = scoreString + score;
-		lifeCounter.text = "X " + lives;
-		if (!timepaused) this.timerTick();
+		scoreText.text = "Score:" + score;
+		lifeCounter.text = "x" + lives;
+		if (!timepaused && gameStart == true) this.timerTick();
 	    //Collision tests
 	    game.physics.arcade.collide(meteors);
 		game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
@@ -117,7 +111,7 @@ var Game =
 		that = this;
 		verbose = false;
 
-		if (typeof levelSettings === "undefined")
+		if (typeof levelSettings == "undefined")
 		{
 		    console.log("levelSettings is undefined, default to lv1");
 		    levelSettings = lv1;
@@ -132,15 +126,23 @@ var Game =
 	gameSetup: function()
 	{
 		pauseLength = 4;
-		shootRateMultiplier = shotSpeedMultiplier = shotSpread = iFrames = 1;
+		shootRateMultiplier = 1;
+		shotSpeedMultiplier = 1;
+		shotSpread = 1;
+		iFrames = 1;
 		baseShotSpeed = -200;
 		dropRate = 0.05;
 
 		spawnDelay = levelSettings["spawnDelay"];
-		spawnTime = bulletTime = firingTime = hurtTime = 0;
+		spawnTime = 0;
+		bulletTime = 0;
+		firingTime = 0;
+		hurtTime = 0;
 		shieldDuration = 2000; // 2 seconds
 		canShoot = true;
-		timepaused = invulnerable = levelEnding = false;
+		timepaused = false;
+		invulnerable = false;
+		levelEnding = false;
 
 		enemyToughness = levelSettings["enemyToughness"];
 		score = levelSettings["score"];
@@ -193,8 +195,42 @@ var Game =
 		bgm.play();
 	},
 
+	//Setup for all UI 
+	uiSetup: function()
+	{
+		//Game timer setup
+		if (typeof levelSettings["TimerStart"] == "undefined") runTimerStart = new Date();
+		else runTimerStart = levelSettings["TimerStart"];
+		if (typeof levelSettings["TimerPaused"] == "undefined") runTimerPaused = 0;
+		else runTimerPaused = levelSettings["TimerPaused"];
+
+		runTimerString = "00:00.00";
+		runTimer = game.add.bitmapText(game.world.width, game.world.height - 15, 'buttonStyle', runTimerString, 9);
+		runTimer.anchor.setTo(1, 0);
+
+		//Score string
+		scoreText = game.add.bitmapText(5, 5, 'buttonStyle', "Score:" + score, 8);
+
+		//Live counter
+		lifeIcon = game.add.sprite(0, game.world.height - sprite.height + 12, 'dragon');
+	    lifeIcon.scale.setTo(0.2);
+	    lifeCounter = game.add.bitmapText(lifeIcon.width, 
+	    	game.world.height - lifeIcon.height + 10, 'buttonStyle', "x" + lives, 9);
+	    
+	    //Pause button
+	    pauseButton = game.add.button(game.world.width - 25, 5, 'pauseBtn', this.pauseMenu);
+	    pauseButton.scale.setTo(0.8, 0.8);
+
+	    //shooting toggle AKA debug button make it do whatever you want for testing
+	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
+	    //function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
+	    function(){that.endLevel()});
+	    shootToggle.scale.setTo(0.8, 0.8);
+	    shootToggle.tint = 0xff0000;
+	},
+
 	//Create barriers on the edges of the screen to despawn offscreen enemies
-	createDespawnBars : function()
+	createDespawnBars: function()
 	{
 		//Group to store the barriers
 		screenEdge = game.add.group();
@@ -214,7 +250,8 @@ var Game =
 		screenLeftBar.width = 10; 
 	},
 
-	pauseTime: function(){
+	pauseTime: function()
+	{
 		function uiFadeIn(object){
 			game.add.tween(object).to({ alpha: 1}, 300, Phaser.Easing.Quadratic.Out, true);
 		}
@@ -239,7 +276,7 @@ var Game =
 				bgm.resume();
 				timepaused = false;
 				uiFadeIn(runTimer);
-				uiFadeIn(lifeCount);
+				uiFadeIn(lifeIcon);
 				uiFadeIn(lifeCounter);
 				uiFadeIn(scoreText);
 				meteors.forEachExists(function(enemy){that.enemyUnfreeze(enemy)});
@@ -268,7 +305,7 @@ var Game =
 		else{
 			timepaused = true;
 			uiFadeOut(runTimer);
-			uiFadeOut(lifeCount);
+			uiFadeOut(lifeIcon);
 			uiFadeOut(lifeCounter);
 			uiFadeOut(scoreText);
 			bgm.pause();
@@ -784,9 +821,12 @@ var Game =
 	    game.time.events.loop(750, function(){
 	    	if(!removing.getFirstExists() && sprite.alpha == 0)
 	    	{
+	    		tempCurrency = parseInt(Cookies.get("currency"));
+	    		Cookies.set("currency", tempCurrency + score);
+	    		console.log("nice", tempCurrency);
 		    	scoreText.kill(); 
 		    	lifeCounter.kill();
-		    	lifeCount.kill();
+		    	lifeIcon.kill();
 		    	runTimer.kill(); 
 		    	pauseButton.kill();
 		    	shootToggle.kill(); // REMOVE IF NEEDED
@@ -843,16 +883,16 @@ var Game =
 
 		bgm.stop();
 		retryButton = createButton("Retry", 10, game.world.width*0.5, game.world.height*0.7,
-						 100, 30, function(){game.paused = false; runTimerPaused +=game.time.pauseDuration; game.state.restart();});
-		exitButton  = createButton("Main Menu", 10, game.world.width*0.5, game.world.height*0.8,
-						 175, 30, function(){game.state.start('MainMenu'); game.paused = false; bgm.stop();});
+						 100, 30, function(){game.paused = false; runTimerPaused += game.time.pauseDuration; game.state.restart();})
+		returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
+								160, 30, function(){game.state.start('MainMenu'); game.paused = false; bgm.stop();});
 	},
 
 	//Pause menu setup
 	pauseMenu: function()
 	{
 		//Create or destroy pause menu accordingly
-		if(game.paused)
+		if (game.paused)
 		{
 			removeButton(resumeButton);
 			removeButton(restartButton);
@@ -865,14 +905,14 @@ var Game =
 			resumeButton  = createButton("Resume", 10, game.world.width*0.5, game.world.height*0.6,
 							 100, 30, that.pauseMenu);
 			restartButton = createButton("Restart", 10, game.world.width*0.5, game.world.height*0.7,
-							 100, 30, function(){bgm.stop(); game.paused = false; runTimerPaused +=game.time.pauseDuration;
-							 						game.state.restart();});
+							 100, 30, function(){bgm.stop(); game.paused = false; runTimerPaused += game.time.pauseDuration; 
+							 	game.state.restart();});
 			titleButton   = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.8, 
 							160, 30, function(){bgm.stop(); game.state.start('MainMenu'); game.paused = false;});
 		}
 	},
 
-	//if paused, unpause and remove pause screen
+	//Checks for pausing, and displays text accordingly
 	pauseFunct: function(string, fontsize, tint, x, y)
 	{
 		if(game.paused)
@@ -903,8 +943,9 @@ var Game =
 	},
 
 	timerTick: function(){
+		//+100 to prevent negative values
 		var currentTime = new Date();
-    	var timeDifference = currentTime.getTime() - runTimerStart.getTime()- runTimerPaused;
+    	var timeDifference = currentTime.getTime() - runTimerStart.getTime()- runTimerPaused - duration + 100;
 
     	var runTimerHun = Math.floor(timeDifference%1000/10);
 		var runTimerSec = Math.floor(timeDifference%60000/1000);
