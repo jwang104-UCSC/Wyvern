@@ -137,7 +137,7 @@ var Game =
 		dropRate = 0.05;
 
 		spawnDelay = levelSettings["spawnDelay"];
-		spawnTime = bulletTime = firingTime = hurtTime = lifeUpCounter = 0;
+		spawnTime = bulletTime = firingTime = hurtTime = 0;
 		shieldDuration = 2000; // 2 seconds
 		canShoot = true;
 		timepaused = invulnerable = levelEnding = false;
@@ -145,7 +145,9 @@ var Game =
 		enemyToughness = levelSettings["enemyToughness"];
 		score = levelSettings["score"];
 		lives = levelSettings["lives"];
-
+		if (typeof levelSettings["lifeUpCounter"] === "undefined") lifeUpCounter = 0;
+		else lifeUpCounter = levelSettings["lifeUpCounter"];
+		
 		// Get potential extra lives from cookies
 		bonusLives = parseInt(Cookies.get("bonus lives"));
 		if (!isNaN(bonusLives)) lives += bonusLives;
@@ -533,7 +535,7 @@ var Game =
 	victimCheck: function(victim)
 	{
 		//If the enemy dies, add to the score and roll for a drop
-		if(victim.hp <= 0)
+		if(victim.hp <= 0 && !timepaused)
 	    {
 	    	that.victimDies(victim, victim.worth);
 
@@ -806,19 +808,16 @@ var Game =
 	},
 
 	setLevelSettings: function(){
-    	if (levelSettings["level"] == 1){
-    		levelSettings = lv2;
-    	}
-		else if (levelSettings["level"] == 2){
-			levelSettings = lv3;
-		}
-		else {
-			levelSettings = lv1; //loop around?
+		switch (levelSettings["level"]){
+			case 1: levelSettings = lv2; break;
+			case 2: levelSettings = lv3; break;
+			default: levelSettings = lv1;
 		}
 		levelSettings["score"] = score;
 		levelSettings["lives"] = lives;
 		levelSettings["TimerStart"] = runTimerStart;
 		levelSettings["TimerPaused"] = runTimerPaused;
+		levelSettings["lifeUpCounter"] = lifeUpCounter;
 	},
 
 	//Game over setup
