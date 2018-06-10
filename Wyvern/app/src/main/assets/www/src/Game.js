@@ -977,17 +977,17 @@ var Game =
 		bossBGM.stop();
 		canShoot = false;
 		spawnTime += 9999999;
+		this.destroyEverything();
 		bossText = game.add.bitmapText(game.world.width*0.51, game.world.centerY*0.9, 'buttonStyle', "??????", 10);
 		bossText.anchor.setTo(0.5, 0.5);
-		game.time.events.add(2000, function(){
+		game.time.events.add(3000, function(){
 			bossText.kill();
 			bossText = game.add.bitmapText(game.world.width*0.52, game.world.centerY*0.9, 'buttonStyle', "Defeat the boss!", 10);
 			bossText.anchor.setTo(0.5, 0.5);
 		});
-		game.time.events.add(4000, function(){
+		game.time.events.add(5000, function(){
 			bossText.kill();
 		});
-		this.destroyEverything();
 		bossHPBar.width = 0;
 		bossHPBarBack.width = 0;
 		bossHPBarBack.alpha = 1;
@@ -1204,10 +1204,10 @@ var Game =
 			resumeButton  = createButton("Resume", 10, game.world.width*0.5, game.world.height*0.6,
 							 100, 30, that.pauseMenu);
 			restartButton = createButton("Restart", 10, game.world.width*0.5, game.world.height*0.7,
-							 100, 30, function(){bgm.stop(); game.paused = false; runTimerPaused += game.time.pauseDuration; 
+							 100, 30, function(){bgm.stop(); bossBGM.stop(); game.paused = false; runTimerPaused += game.time.pauseDuration; 
 							 	game.state.restart();});
 			titleButton   = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.8, 
-							160, 30, function(){bgm.stop(); game.state.start('MainMenu'); game.paused = false;});
+							160, 30, function(){bgm.stop(); bossBGM.stop(); game.state.start('MainMenu'); game.paused = false;});
 		}
 	},
 

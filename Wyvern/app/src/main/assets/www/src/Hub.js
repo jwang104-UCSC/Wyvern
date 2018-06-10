@@ -13,11 +13,11 @@ var Hub =
 		txt2.anchor.setTo(0.5,0.5);
 	    lv1 = {
 	    	"level": 1,
-	    	"bgm": "cosmosBGM",
+	    	"bgm": "generalBGM",
 	    	"makeEnemy%": 0.5,
 	    	"Enemy Type 1": "meteors",
 	    	"Enemy Type 2": "eyes",
-	    	"spawnDelay": 100,
+	    	"spawnDelay": 200,
 	    	"enemyToughness": 2,
 	    	"score": 0,
 	    	"lives": 5,
@@ -30,7 +30,7 @@ var Hub =
 	    	"Enemy Type 1": "meteors",
 	    	"Enemy Type 2": "meteors",
 	    	"spawnDelay": 150,
-	    	"enemyToughness": 0,
+	    	"enemyToughness": 1,
 	    	"score": 0,
 	    	"lives": 5,
 	    	"objective": "\nSurvive for\n\n60 seconds!"
@@ -38,12 +38,12 @@ var Hub =
 	    //placeholder, good luck lol
 	    lv3 = {
 	    	"level": 3,
-	    	"bgm": "gunsBGM",
+	    	"bgm": "generalBGM",
 	    	"makeEnemy%": 0.7,
 	    	"Enemy Type 1": "meteors",
 	    	"Enemy Type 2": "meteors",
-	    	"spawnDelay": 20,
-	    	"enemyToughness": 1,
+	    	"spawnDelay": 50,
+	    	"enemyToughness": 0,
 	    	"score": 0,
 	    	"lives": 5,
 	    	"objective": "Reach 10000 score!"

@@ -35,8 +35,9 @@ var Preloader = {
 
 
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
-		game.load.audio('cosmosBGM', 'sfx/Metal Slug 3 - Into the Cosmos.ogg');
-		//game.load.audio('bossBGM', 'sfx/Metal Slug 3 - Steel Beasts 6Beets.ogg');
+		game.load.audio('generalBGM', 'sfx/Evil Flight.mp3');
+		game.load.audio('bossBGM', 'sfx/Snack of the Snake.mp3');
+
 		//placeholder lv.2 bgm
 		game.load.audio('gunsBGM', 'sfx/mus107.ogg');
 		
@@ -62,7 +63,6 @@ var Preloader = {
 
 		game.load.audio('theme', 'sfx/Elysium, in the Blue Sky.mp3');
 		game.load.audio('level2BGM', 'sfx/Song of the Ancients - Atonement.wav');
-		game.load.audio('bossBGM', 'sfx/Dark Impetus.mp3');
 		
 
 		game.load.audio('explosionSFX', 'sfx/063 explode.wav');

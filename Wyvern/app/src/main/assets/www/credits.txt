@@ -8,6 +8,8 @@ Metal Slug 3 - Into the Cosmos.ogg, Metal Slug 3 - Steel Beasts 6Beets.ogg -- Me
 clockTick.ogg -- https://freesound.org/people/straget/sounds/405423/
 Elysium, in the Blue Sky.mp3 -- Xenoblade Chronicles 2
 Song of the Ancients - Atonement.wav -- NieR Automata OST
+Evil Flight.mp3 -- Bravely Default OST
+Snake of the Snake.mp3 -- Bravely Default OST
 
 img/
 explode.png, flixel-button.png -- Phaser examples
