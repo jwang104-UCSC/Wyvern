@@ -174,6 +174,7 @@ var Game =
 		playerHurt  = game.add.audio('hurt', 0.15);
 		lifeUp  	= game.add.audio('1up', 0.7);
 
+		bossDying 	= game.add.audio('bossDying', 0.1);
 		bossDeath 	= game.add.audio('bossDeath', 0.25);
 		bossCharge 	= game.add.audio('laserCharge', 0.4);
 		bossShoot 	= game.add.audio('laserShot', 0.2);
@@ -997,7 +998,6 @@ var Game =
 	},
 	bossAttack: function()
 	{
-		console.log("what");
 		var targetX = randomIntFromInterval(20, 180);
 		var target = bossLasers.getFirstExists(false);
 			if (target)
@@ -1045,6 +1045,7 @@ var Game =
 		game.time.events.remove(bossMovement);
 		function bossDies(){
 			bossHPBar.alpha = 0;
+			bossDying.play();
 			game.add.tween(boss).to({tint:0x808080}, 1300, Phaser.Easing.Linear.None, true);
 			for(var i = 0; i < 10; i++)
 				{
