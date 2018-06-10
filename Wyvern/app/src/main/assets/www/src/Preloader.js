@@ -27,7 +27,7 @@ var Preloader = {
 		game.load.spritesheet('eyes', 'img/eyes35x32.png', 35, 32, 16);
 		game.load.spritesheet('letters', 'img/letters-white.png', 9, 8, 26);
 		game.load.spritesheet('numbers', 'img/numbers-white.png', 9, 8, 12);
-		game.load.spritesheet('meteor', 'img/meteorite-fixed.png', 32, 32, 30);
+		game.load.spritesheet('meteor', 'img/meteorites.png', 32, 32, 30);
 		
 		game.load.bitmapFont('buttonStyle', 'img/carrier_command.png', 'img/carrier_command.xml');
 		game.load.bitmapFont('titleFont', 'img/desyrel.png', 'img/desyrel.xml');

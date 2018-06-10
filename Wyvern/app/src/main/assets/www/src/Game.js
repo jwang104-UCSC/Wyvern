@@ -50,9 +50,14 @@ var Game =
 			this.endLevel();
 			endCondition++;
 		}
-		if (timeDifference >= 60000 && endCondition == 0 && levelSettings['level'] == 2)
+		else if (timeDifference >= 60000 && endCondition == 0 && levelSettings['level'] == 2)
 		{
 			this.endLevel();
+			endCondition++;
+		}
+		else if (score >= 10000 && endCondition == 0 && levelSettings['level'] == 3)
+		{
+			this.startBossFight();
 			endCondition++;
 		}
 	    if (!timepaused) background.tilePosition.y += 2;
@@ -972,6 +977,16 @@ var Game =
 		bossBGM.stop();
 		canShoot = false;
 		spawnTime += 9999999;
+		bossText = game.add.bitmapText(game.world.width*0.51, game.world.centerY*0.9, 'buttonStyle', "??????", 10);
+		bossText.anchor.setTo(0.5, 0.5);
+		game.time.events.add(2000, function(){
+			bossText.kill();
+			bossText = game.add.bitmapText(game.world.width*0.52, game.world.centerY*0.9, 'buttonStyle', "Defeat the boss!", 10);
+			bossText.anchor.setTo(0.5, 0.5);
+		});
+		game.time.events.add(4000, function(){
+			bossText.kill();
+		});
 		this.destroyEverything();
 		bossHPBar.width = 0;
 		bossHPBarBack.width = 0;
@@ -1098,10 +1113,6 @@ var Game =
 	    game.time.events.loop(750, function(){
 	    	if(!removing.getFirstExists() && sprite.y == 0)
 	    	{
-	    		tempCredits = parseInt(Cookies.get("credits"));
-	    		if (isNaN(tempCredits)) tempCredits = 0;
-	    		Cookies.set("credits", tempCredits + score);
-	    		console.log("credits", tempCredits + score);
 		    	scoreText.kill(); 
 		    	lifeCounter.kill();
 		    	lifeIcon.kill();
@@ -1154,6 +1165,10 @@ var Game =
 	//Displays score data at end of level
 	checkScore: function()
 	{
+		tempCredits = parseInt(Cookies.get("credits"));
+	    if (isNaN(tempCredits)) tempCredits = 0;
+	    Cookies.set("credits", tempCredits + score);
+	    console.log("credits", tempCredits + score);
 		var highscore = parseInt(Cookies.get("highscore"));
 		if (isNaN(highscore)) highscore = 0;
 

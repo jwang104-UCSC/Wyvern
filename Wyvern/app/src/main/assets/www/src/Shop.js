@@ -133,6 +133,7 @@ var Shop =
 			if (credits >= 2000)
 			{
 				credits -= 2000;
+				Cookies.set('credits', credits); 
 				Cookies.set('bonus lives', ++tempLives); 
 				textRise("    Lives\nUpgraded!", game.world.width*0.5, game.world.centerY*0.6);
 
@@ -164,6 +165,7 @@ var Shop =
 			{
 				credits -= 5000;
 				tempShield += 1000;
+				Cookies.set('credits', credits); 
 				Cookies.set('bonus shield', tempShield); 
 				textRise("   Shield\nUpgraded!", game.world.width*0.5, game.world.centerY*0.6);
 
@@ -194,7 +196,7 @@ var Shop =
 			{
 				credits -= 10000;
 				Cookies.set('bonus spread', ++tempSpread);
-
+				Cookies.set('credits', credits); 
 				//Bullet display eye candy
 				if (tempSpread == 1) 
 				{

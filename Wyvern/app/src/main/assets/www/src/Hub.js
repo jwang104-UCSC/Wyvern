@@ -17,7 +17,7 @@ var Hub =
 	    	"makeEnemy%": 0.5,
 	    	"Enemy Type 1": "meteors",
 	    	"Enemy Type 2": "eyes",
-	    	"spawnDelay": 200,
+	    	"spawnDelay": 100,
 	    	"enemyToughness": 2,
 	    	"score": 0,
 	    	"lives": 5,
@@ -30,7 +30,7 @@ var Hub =
 	    	"Enemy Type 1": "meteors",
 	    	"Enemy Type 2": "meteors",
 	    	"spawnDelay": 150,
-	    	"enemyToughness": 1,
+	    	"enemyToughness": 0,
 	    	"score": 0,
 	    	"lives": 5,
 	    	"objective": "\nSurvive for\n\n60 seconds!"
@@ -43,10 +43,10 @@ var Hub =
 	    	"Enemy Type 1": "meteors",
 	    	"Enemy Type 2": "meteors",
 	    	"spawnDelay": 20,
-	    	"enemyToughness": 0,
+	    	"enemyToughness": 1,
 	    	"score": 0,
 	    	"lives": 5,
-	    	"objective": "Defeat the boss"
+	    	"objective": "Reach 10000 score!"
 	    };
 		Level1 = createButton("Level 1", 10, game.world.width*0.4, game.world.height*0.4, 
 								140, 30, function(){
