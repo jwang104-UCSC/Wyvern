@@ -26,7 +26,7 @@ var Shop =
 		if (isNaN(credits)) credits = 0;
 	},
 
-	//Handles mostlyy static sprite and text displays
+	//Handles mostly static sprite and text displays
 	generalDisplay: function()
 	{
 		//Shop title text
@@ -42,15 +42,20 @@ var Shop =
 		wyvern.scale.setTo(0.3);
 
 		//Check if bullet sprites need to be added according to spread upgrades
-		if (tempSpread >= 1)
+		if (tempSpread == 1)
+		{
+			bullet1.kill();
+			bullet1 = game.add.sprite(game.world.width*0.75, game.world.height*0.7, 'fireball');
+			bullet2 = game.add.sprite(game.world.width*0.80, game.world.height*0.7, 'fireball');
+			bullet1.scale.setTo(0.01);
+			bullet2.scale.setTo(0.01);
+		}
+		else if (tempSpread == 2)
 		{
 			bullet2 = game.add.sprite(game.world.width*0.825, game.world.height*0.7, 'fireball');
+			bullet3 = game.add.sprite(game.world.width*0.725, game.world.height*0.7, 'fireball');
 			bullet2.scale.setTo(0.01);
-			if (tempSpread == 2)
-			{
-				bullet3 = game.add.sprite(game.world.width*0.725, game.world.height*0.7, 'fireball');
-				bullet3.scale.setTo(0.01);
-			}
+			bullet3.scale.setTo(0.01);
 		}
 
 		//Prices of upgrades

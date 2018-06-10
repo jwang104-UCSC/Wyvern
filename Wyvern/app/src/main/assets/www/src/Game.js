@@ -2,8 +2,9 @@ var Game =
 {
 	create: function() {
 
+		//Gets the seed and puts in level settings
 		this.seedAndSettings();
-		
+
 		//Background
 		background = game.add.tileSprite(0, 0, 200, 1280, 'redsky');
 		background.tint = 0x808080;
@@ -17,24 +18,11 @@ var Game =
 		this.initializeDrops();
 		this.initializeEnemies();
 
+		//Screen borders
 		this.createDespawnBars();
 
-		//player
-		sprite = game.add.sprite(game.world.width*0.5, game.world.centerY*1.8, 'dragon');
-		sprite.scale.setTo(0.35);
-		sprite.anchor.setTo(0.5, 0.8);
-		hitbox = game.add.sprite(0, -50, "bullet");
-		invuln = game.add.sprite(0, 0-48, "invuln");
-		invuln.anchor.setTo(0.5, 0.5);
-		invuln.scale.setTo(1.25);
-		invuln.alpha = 0;
-		sprite.addChild(hitbox);
-		sprite.addChild(invuln);
-		hitbox.anchor.setTo(0.5, 0.5);
-		sprite.inputEnabled = true; 
-		sprite.input.enableDrag(true);
-		game.physics.enable(sprite, Phaser.Physics.ARCADE);
-		//sprite.body.collideWorldBounds = true;
+		//Player settings
+		this.playerSetup();
 		
 		//make explosions
 	    explosions = game.add.group();
@@ -51,13 +39,18 @@ var Game =
 		this.uiSetup();
 		this.prompter();
 
-		//Makes it so that the endLevel() function doesn't run more than once
+		//Makes it so that the endLevel() function only runs once per level
 		endCondition = 0;
 	},
 
 	update: function() 
 	{	
-		if (score >= 5000 && endCondition == 0)
+		if (score >= 5000 && endCondition == 0 && levelSettings['level'] == 1)
+		{
+			this.endLevel();
+			endCondition++;
+		}
+		if (timeDifference >= 60000 && endCondition == 0 && levelSettings['level'] == 2)
 		{
 			this.endLevel();
 			endCondition++;
@@ -98,6 +91,8 @@ var Game =
 
 	seedAndSettings: function()
 	{
+		timeDifference = 0; //Defined here as a global as an accurate time tracker
+
 		var seed = parseInt(Cookies.get("seed"));
 		if (typeof Cookies.get("seed") != 'undefined') Math.seedrandom(seed);
 		else Math.seedrandom();
@@ -106,7 +101,7 @@ var Game =
 		game.time.advancedTiming = true;
 		that = this;
 		verbose = false;
-		showFPS=false;
+		showFPS = false;
 
 		if (typeof levelSettings == "undefined")
 		{
@@ -201,6 +196,171 @@ var Game =
 		bgm.play();
 	},
 
+	//Creates the bullets fired by the player
+	initializeBullets: function()
+	{
+		//Group to store bullets
+	 	bullets = game.add.group();
+	    bullets.enableBody = true;
+	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    //CHANGE 500 MAYBE? Indicates max bullets on screen, heavily affects FPS
+	    for (var i = 0; i < 500; i++)
+	    {
+	        var b = bullets.create(0, 0, 'fireball');
+	        b.scale.setTo(0.01);
+	        b.name = 'bullet' + i;
+	        b.anchor.setTo(0.5, 0.5);
+	        b.exists = b.visible = false;
+	        b.checkWorldBounds = true;
+	        b.events.onOutOfBounds.add(resetFunct, this);
+	        b.tween = null;
+	    }
+	},
+
+	//Creates power up drops from enemies
+	initializeDrops: function()
+	{
+		//Group to store drops
+		drops = game.add.group();
+		drops.enableBody = true;
+		drops.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    for (var i = 0; i < 100; i++)
+	    { 
+	        var d = drops.create(0, 0, 'shield');
+	        d.dropType = 0;
+	        d.name = 'drop' + i;
+	        d.scale.setTo(0.6)
+	        d.anchor.setTo(0.5, 0.5);
+	        d.exists = d.visible = false;
+	        d.checkWorldBounds = d.body.collideWorldBounds = true;
+	        d.events.onOutOfBounds.add(resetFunct, this);
+	        d.body.maxVelocity.setTo(150);
+	        d.timer = null;
+	    }
+	},
+
+	//Creates all the enemies used in the level
+	initializeEnemies: function()
+	{
+		//Make enemy groups
+		eyes = game.add.group();
+	    meteors = game.add.group();
+
+		eyes.enableBody = meteors.enableBody = true;
+		eyes.physicsBodyType = meteors.physicsBodyType = Phaser.Physics.ARCADE;
+
+	    for (var i = 0; i < 100; i++)
+	    { 
+	        var e = eyes.create(0, 0, 'eyes');
+	        e.name = 'eyes' + i;
+			e.anchor.setTo(0.5, 0.5);
+			e.animations.add("fly", 
+				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], 20, true);
+			e.play('fly');
+	        e.exists = e.visible = false;
+	        e.hp = enemyToughness;
+	        e.worth = 100;
+	    }
+
+	    for (var i = 0; i < 100; i++)
+	    { 
+	        var e = meteors.create(0, 0, 'meteor');
+	        e.name = 'rock' + i;
+			e.anchor.setTo(0.5, 0.5);
+			e.animations.add("fly", 
+				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
+			     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], 20, true);
+			e.play('fly');
+	        e.exists = e.visible = false;
+	        e.hp = enemyToughness + 1;
+	        e.worth = 50;
+	    }
+
+		bossLasers = game.add.group();
+	    bossLasers.enableBody = true;
+
+	    for (var i = 0; i < 10; i++)
+	    { 
+	        var b = bossLasers.create(0, 0, 'bullet');
+	        b.name = 'bossLaser' + i;
+	        b.anchor.setTo(0.5,0);
+	        b.exists = false;
+	        b.visible = false;
+	        b.tangible = false;
+	    }
+
+	    boss = game.add.sprite(0, 0, 'dorito');
+	    boss.name = "why";
+	    boss.anchor.setTo(0.5);
+	    boss.exists = false;
+	    boss.visible = false;
+	    boss.scale.setTo(0.6,0.6);
+	    bossMaxHP = 200;
+	    boss.hp = bossMaxHP;
+	    bossHurtTime = 0;
+	    bossHpPercent = boss.hp/bossMaxHP;
+	    game.physics.enable(boss, Phaser.Physics.ARCADE);
+
+	    bossHPBarBack = game.add.sprite(0, game.world.height-5, "bullet");
+	    bossHPBar = game.add.sprite(0, game.world.height-5, "bullet");
+	    bossHPBar.scale.setTo(1,0.5);
+	    bossHPBar.anchor.setTo(0)
+	    bossHPBar.width = 0;
+	    bossHPBar.tint = 0xFF0000
+
+	    bossHPBarBack.scale.setTo(1,0.5);
+	    bossHPBarBack.anchor.setTo(0)
+	    bossHPBarBack.width = 0; 	
+	},
+
+	//Create barriers on the edges of the screen to despawn offscreen enemies
+	createDespawnBars: function()
+	{
+		//Group to store the barriers
+		screenEdge = game.add.group();
+		screenEdge.enableBody = true;
+		screenEdge.physicsBodyType = Phaser.Physics.ARCADE;
+
+		//Make the barriers according to screen specifications
+		screenTopBar    = screenEdge.create(0, -50, 'preloaderBar');
+		screenBottomBar = screenEdge.create(0, game.world.height + 50, 'preloaderBar');
+		screenLeftBar   = screenEdge.create(-50, 0, 'preloaderBar');
+		screenRightBar  = screenEdge.create(game.world.width + 50, 0, 'preloaderBar');
+
+		screenTopBar.width   = screenBottomBar.width = game.world.width*1.5;
+		screenLeftBar.height = screenRightBar.height = game.world.height*1.5;
+
+		//Shrinks size of left barrier to hide it offscreen
+		screenLeftBar.width = 10; 
+	},
+
+	playerSetup: function()
+	{
+		sprite = game.add.sprite(game.world.width*0.5, game.world.centerY*1.8, 'dragon');
+		hitbox = game.add.sprite(0, -50, "bullet");
+		invuln = game.add.sprite(0, -48, "invuln");
+
+		sprite.anchor.setTo(0.5, 0.8);
+		hitbox.anchor.setTo(0.5, 0.5);
+		invuln.anchor.setTo(0.5, 0.5);
+
+		sprite.scale.setTo(0.35);
+		invuln.scale.setTo(1.25);
+
+		sprite.addChild(hitbox);
+		sprite.addChild(invuln);
+
+		invuln.alpha = 0;
+
+		sprite.inputEnabled = true; 
+		sprite.input.enableDrag(true);
+		
+		game.physics.enable(sprite, Phaser.Physics.ARCADE);
+		//sprite.body.collideWorldBounds = true;
+	},
+
 	//Setup for all UI 
 	uiSetup: function()
 	{
@@ -231,6 +391,7 @@ var Game =
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
 	    //function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
 	    //function(){fanfare.play();});
+	    //function(){that.endLevel();});
 	    function(){that.startBossFight()});
 
 	    shootToggle.scale.setTo(0.8, 0.8);
@@ -256,27 +417,6 @@ var Game =
 			levelText.kill();
 			goalText.kill();
 		});
-	},
-
-	//Create barriers on the edges of the screen to despawn offscreen enemies
-	createDespawnBars: function()
-	{
-		//Group to store the barriers
-		screenEdge = game.add.group();
-		screenEdge.enableBody = true;
-		screenEdge.physicsBodyType = Phaser.Physics.ARCADE;
-
-		//Make the barriers according to screen specifications
-		screenTopBar    = screenEdge.create(0, -50, 'preloaderBar');
-		screenBottomBar = screenEdge.create(0, game.world.height + 50, 'preloaderBar');
-		screenLeftBar   = screenEdge.create(-50, 0, 'preloaderBar');
-		screenRightBar  = screenEdge.create(game.world.width + 50, 0, 'preloaderBar');
-
-		screenTopBar.width   = screenBottomBar.width = game.world.width*1.5;
-		screenLeftBar.height = screenRightBar.height = game.world.height*1.5;
-
-		//Shrinks size of left barrier to hide it offscreen
-		screenLeftBar.width = 10; 
 	},
 
 	pauseTime: function()
@@ -474,127 +614,6 @@ var Game =
 	enemyOffScreen: function(bar, enemy)
 	{
 		that.enemyReset(enemy);
-	},
-
-	//Creates the bullets fired by the player
-	initializeBullets: function()
-	{
-		//Group to store bullets
-	 	bullets = game.add.group();
-	    bullets.enableBody = true;
-	    bullets.physicsBodyType = Phaser.Physics.ARCADE;
-
-	    //CHANGE 500 MAYBE? Indicates max bullets on screen, heavily affects FPS
-	    for (var i = 0; i < 500; i++)
-	    {
-	        var b = bullets.create(0, 0, 'fireball');
-	        b.scale.setTo(0.01);
-	        b.name = 'bullet' + i;
-	        b.anchor.setTo(0.5, 0.5);
-	        b.exists = b.visible = false;
-	        b.checkWorldBounds = true;
-	        b.events.onOutOfBounds.add(resetFunct, this);
-	        b.tween = null;
-	    }
-	},
-
-	//Creates power up drops from enemies
-	initializeDrops: function()
-	{
-		//Group to store drops
-		drops = game.add.group();
-		drops.enableBody = true;
-		drops.physicsBodyType = Phaser.Physics.ARCADE;
-
-	    for (var i = 0; i < 100; i++)
-	    { 
-	        var d = drops.create(0, 0, 'shield');
-	        d.dropType = 0;
-	        d.name = 'drop' + i;
-	        d.scale.setTo(0.6)
-	        d.anchor.setTo(0.5, 0.5);
-	        d.exists = d.visible = false;
-	        d.checkWorldBounds = d.body.collideWorldBounds = true;
-	        d.events.onOutOfBounds.add(resetFunct, this);
-	        d.body.maxVelocity.setTo(150);
-	        d.timer = null;
-	    }
-	},
-
-	//Creates all the enemies used in the level
-	initializeEnemies: function()
-	{
-		//Make enemy groups
-		eyes = game.add.group();
-	    meteors = game.add.group();
-
-		eyes.enableBody = meteors.enableBody = true;
-		eyes.physicsBodyType = meteors.physicsBodyType = Phaser.Physics.ARCADE;
-
-	    for (var i = 0; i < 100; i++)
-	    { 
-	        var e = eyes.create(0, 0, 'eyes');
-	        e.name = 'eyes' + i;
-			e.anchor.setTo(0.5, 0.5);
-			e.animations.add("fly", 
-				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], 20, true);
-			e.play('fly');
-	        e.exists = e.visible = false;
-	        e.hp = enemyToughness;
-	        e.worth = 100;
-	    }
-
-	    for (var i = 0; i < 100; i++)
-	    { 
-	        var e = meteors.create(0, 0, 'meteor');
-	        e.name = 'rock' + i;
-			e.anchor.setTo(0.5, 0.5);
-			e.animations.add("fly", 
-				[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 
-			     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], 20, true);
-			e.play('fly');
-	        e.exists = e.visible = false;
-	        e.hp = enemyToughness + 1;
-	        e.worth = 50;
-	    }
-
-		bossLasers = game.add.group();
-	    bossLasers.enableBody = true;
-
-	    for (var i = 0; i < 10; i++)
-	    { 
-	        var b = bossLasers.create(0, 0, 'bullet');
-	        b.name = 'bossLaser' + i;
-	        b.anchor.setTo(0.5,0);
-	        b.exists = false;
-	        b.visible = false;
-	        b.tangible = false;
-	    }
-
-	    boss = game.add.sprite(0, 0, 'dorito');
-	    boss.name = "why";
-	    boss.anchor.setTo(0.5);
-	    boss.exists = false;
-	    boss.visible = false;
-	    boss.scale.setTo(0.6,0.6);
-	    bossMaxHP = 200;
-	    boss.hp = bossMaxHP;
-	    bossHurtTime = 0;
-	    bossHpPercent = boss.hp/bossMaxHP;
-	    game.physics.enable(boss, Phaser.Physics.ARCADE);
-
-	    bossHPBarBack = game.add.sprite(0, game.world.height-5, "bullet");
-	    bossHPBar = game.add.sprite(0, game.world.height-5, "bullet");
-	    bossHPBar.scale.setTo(1,0.5);
-	    bossHPBar.anchor.setTo(0)
-	    bossHPBar.width = 0;
-	    bossHPBar.tint = 0xFF0000
-
-	    bossHPBarBack.scale.setTo(1,0.5);
-	    bossHPBarBack.anchor.setTo(0)
-	    bossHPBarBack.width = 0;
-
-	 	
 	},
 
 	fireBullet: function() 
@@ -1082,26 +1101,23 @@ var Game =
 	    		tempCredits = parseInt(Cookies.get("credits"));
 	    		if (isNaN(tempCredits)) tempCredits = 0;
 	    		Cookies.set("credits", tempCredits + score);
-	    		console.log("nice", tempCredits);
+	    		console.log("credits", tempCredits + score);
 		    	scoreText.kill(); 
 		    	lifeCounter.kill();
 		    	lifeIcon.kill();
 		    	runTimer.kill(); 
 		    	pauseButton.kill();
 		    	shootToggle.kill(); // REMOVE IF NEEDED
-		    	this.pauseFunct("   Level\nComplete!", 40, 0xFFFFFF);
-		    	finalscore = game.add.bitmapText(game.world.width*0.5, game.world.height*0.5, 'titleFont', "Score: " + score, 30);
-		    	finalscore.anchor.setTo(0.5, 0.5);
-		    	nextButton = createButton("Next Level", 10, game.world.width*0.5, game.world.height*0.8, 
-									140, 30, function(){
-										game.paused = false;
-										runTimerPaused +=game.time.pauseDuration;
-										game.sound.stopAll();
-								    	that.setLevelSettings();
-										game.state.start('Game')
-									});
-		    	returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
-									160, 30, function(){game.paused = false; game.state.start('MainMenu')});
+		    	this.pauseFunct("   Level\nComplete!", 40, 0xFFFFFF, game.world.width*0.5, game.world.centerY*0.35);
+		    	this.checkScore();
+
+		    	bgm.stop();
+		    	retryButton = createButton("Retry", 10, game.world.width*0.5, game.world.height*0.7, 
+									80, 30, function(){game.paused = false; game.state.start('Game')});
+		    	nextButton = createButton("Level Select", 10, game.world.width*0.5, game.world.height*0.8, 
+									170, 30, function(){game.paused = false; game.state.start('Hub');});
+		    	titleButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
+									170, 30, function(){game.paused = false; game.state.start('MainMenu');});
 		    }
 	    }, this);
 
@@ -1124,29 +1140,38 @@ var Game =
 	gameOver: function()
 	{
 		this.pauseFunct("DEFEAT", 50, 0xFFFFF);
-		var textFormat = {font:'16px Arial', fill:'#fff'};
+		this.checkScore();
+
+		bgm.stop();
+		retryButton = createButton("Retry", 10, game.world.width*0.5, game.world.height*0.7,
+						 100, 30, function(){game.paused = false; runTimerPaused += game.time.pauseDuration; game.state.restart();})
+		levelButton = createButton("Level Select", 10, game.world.width*0.5, game.world.height*0.8, 
+								170, 30, function(){game.state.start('Hub'); game.paused = false;});
+		titleButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
+								170, 30, function(){game.state.start('MainMenu'); game.paused = false;});
+	},
+
+	//Displays score data at end of level
+	checkScore: function()
+	{
 		var highscore = parseInt(Cookies.get("highscore"));
 		if (isNaN(highscore)) highscore = 0;
 
-		var endScore = game.add.text(game.world.width*0.5, game.world.height*0.5, "Final score: " + score, textFormat);
+		var endScore = game.add.bitmapText(game.world.width*0.505, game.world.height*0.4, 'buttonStyle', "FINAL SCORE:" + score, 9);
 		if(score > highscore){
 			highscore = score;
 			Cookies.set("highscore", score);
-			var newHigh = game.add.text(game.world.width*0.5, game.world.height*0.6, 
-				"New highscore!", {font:'16px Arial', fill:'#ffff00'});
+			var newHigh = game.add.bitmapText(game.world.width*0.505, game.world.height*0.55, 'buttonStyle', 
+				"NEW HIGHSCORE!", 8);
+			newHigh.tint = 0xFFFF00;
 			newHigh.anchor.setTo(0.5);
 		}
-		var highscoreText = game.add.text(game.world.width*0.5, game.world.height*0.55, 
-			"Highscore: " + highscore, textFormat);
+		var highscoreText = game.add.bitmapText(game.world.width*0.51, game.world.height*0.475, 'buttonStyle',
+			"HIGHSCORE:" + highscore, 9);
 		endScore.anchor.setTo(0.5);
 		highscoreText.anchor.setTo(0.5);
-
-		game.sound.stopAll();
-		retryButton = createButton("Retry", 10, game.world.width*0.5, game.world.height*0.7,
-						 100, 30, function(){game.paused = false; runTimerPaused += game.time.pauseDuration; game.state.restart();})
-		returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
-								160, 30, function(){game.state.start('MainMenu'); game.paused = false;});
 	},
+
 	//Pause menu setup
 	pauseMenu: function()
 	{
@@ -1204,11 +1229,12 @@ var Game =
 	timerTick: function(){
 		//+100 to prevent negative values
 		var currentTime = new Date();
-    	var timeDifference = currentTime.getTime() - runTimerStart.getTime()- runTimerPaused - duration + 100;
+    	timeDifference = currentTime.getTime() - runTimerStart.getTime() - runTimerPaused - duration + 100;
+    	//console.log("", timeDifference);
 
     	var runTimerHun = Math.floor(timeDifference%1000/10);
 		var runTimerSec = Math.floor(timeDifference%60000/1000);
-		var runTimerMin = Math.floor(timeDifference/60000);;
+		var runTimerMin = Math.floor(timeDifference/60000);
 
     	runTimerString = (runTimerMin < 10) ? "0" + runTimerMin : runTimerMin;
     	runTimerString += (runTimerSec < 10) ? ":0" + runTimerSec : ":" + runTimerSec;

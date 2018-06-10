@@ -2,7 +2,7 @@ var MainMenu =
 {
 	create: function() 
 	{
-		//game.sound.stopAll();
+		if (!theme.isPlaying) theme.play();
 		game.add.sprite(-100, -240, 'mainMenu-bg');
 
 		//Add custom font for title text
@@ -42,7 +42,7 @@ function createButton(string,fontsize,x,y,w,h,callback)
 	var button1 = game.add.button(x,y,'button',callback,this,2,1,0);
 
 	//Add SFX to buttons
-	var fx = game.add.audio('buttonSFX', 0.2);  //tone down the sound because it's too noisy by default
+	var fx = game.add.audio('buttonSFX', 0.1);  //tone down the sound because it's too noisy by default
 	button1.onDownSound = (fx);
 
 	button1.anchor.setTo(0.5,0.5);

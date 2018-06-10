@@ -2,6 +2,7 @@ var Hub =
 {
 	create: function() 
 	{
+		if (!theme.isPlaying) theme.play();
 		game.add.sprite(-100, -240, 'mainMenu-bg');
 
 		//Add custom font for title text
@@ -22,11 +23,9 @@ var Hub =
 	    	"lives": 5,
 	    	"objective": "Reach 5000 score!"
 		};
-		//loads into game for faster testing
-		game.state.start("Game");
 	    lv2 = {
 	    	"level": 2,
-	    	"bgm": "gunsBGM",
+	    	"bgm": "level2BGM",
 	    	"makeEnemy%": 0.7,
 	    	"Enemy Type 1": "meteors",
 	    	"Enemy Type 2": "meteors",
@@ -34,7 +33,7 @@ var Hub =
 	    	"enemyToughness": 1,
 	    	"score": 0,
 	    	"lives": 5,
-	    	"objective": "\nSurvive for\n\n30 seconds!"
+	    	"objective": "\nSurvive for\n\n60 seconds!"
 	    };
 	    //placeholder, good luck lol
 	    lv3 = {
@@ -52,16 +51,19 @@ var Hub =
 		Level1 = createButton("Level 1", 10, game.world.width*0.4, game.world.height*0.4, 
 								140, 30, function(){
 									levelSettings = lv1;
+									theme.stop();
 									game.state.start('Game');
 									});
 		Level2 = createButton("Level 2", 10, game.world.width*0.6, game.world.height*0.55, 
 								140, 30, function(){
 									levelSettings = lv2;
+									theme.stop();
 									game.state.start('Game');
 									});
 		Level3 = createButton("Level 3", 10, game.world.width*0.4, game.world.height*0.7, 
 								140, 30, function(){
-									levelSettings = lv2;
+									levelSettings = lv3;
+									theme.stop();
 									game.state.start('Game');
 									});
 

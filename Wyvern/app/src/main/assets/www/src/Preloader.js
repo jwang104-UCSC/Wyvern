@@ -36,7 +36,7 @@ var Preloader = {
 
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
 		game.load.audio('cosmosBGM', 'sfx/Metal Slug 3 - Into the Cosmos.ogg');
-		game.load.audio('bossBGM', 'sfx/Metal Slug 3 - Steel Beasts 6Beets.ogg');
+		//game.load.audio('bossBGM', 'sfx/Metal Slug 3 - Steel Beasts 6Beets.ogg');
 		//placeholder lv.2 bgm
 		game.load.audio('gunsBGM', 'sfx/mus107.ogg');
 		
@@ -59,7 +59,10 @@ var Preloader = {
 		game.load.audio('1up', 'sfx/1-up.mp3');
 		game.load.audio('bossDying', 'sfx/674 death.wav');
 		game.load.audio('bossDeath', 'sfx/sndMeltingUltraA.ogg');
-		
+
+		game.load.audio('theme', 'sfx/Elysium, in the Blue Sky.mp3');
+		game.load.audio('level2BGM', 'sfx/Song of the Ancients - Atonement.wav');
+		game.load.audio('bossBGM', 'sfx/Dark Impetus.mp3');
 		
 
 		game.load.audio('explosionSFX', 'sfx/063 explode.wav');
@@ -73,7 +76,10 @@ var Preloader = {
 	create: function()
 	{
 		game.add.plugin(PhaserInput.Plugin);
-		game.state.start("Shop");
+		theme = game.add.audio('theme', 0.3, true);
+		theme.play();
+		game.state.start("MainMenu");
+		//game.state.start("Settings");
 		//game.state.start("Hub");
 	}
 }

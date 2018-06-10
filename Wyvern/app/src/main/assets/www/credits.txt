@@ -6,6 +6,8 @@ Za Warudo.mp3, Warudo End.ogg -- JoJo's Bizarre Adventure: Stardust Crusaders
 1-up.mp3 -- Metal Slug 3
 Metal Slug 3 - Into the Cosmos.ogg, Metal Slug 3 - Steel Beasts 6Beets.ogg -- Metal Slug 3
 clockTick.ogg -- https://freesound.org/people/straget/sounds/405423/
+Elysium, in the Blue Sky.mp3 -- Xenoblade Chronicles 2
+Song of the Ancients - Atonement.wav -- NieR Automata OST
 
 img/
 explode.png, flixel-button.png -- Phaser examples
