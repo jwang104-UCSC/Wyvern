@@ -1,7 +1,9 @@
 sfx/
+2a2e charge up.wav -- Undertale
 ###*.wav -- Nuclear Throne
 sndMeltingUltraA.ogg -- Nuclear Throne
 Za Warudo.mp3, Warudo End.ogg -- JoJo's Bizarre Adventure: Stardust Crusaders
+1-up.mp3 -- Metal Slug 3
 Metal Slug 3 - Into the Cosmos.ogg, Metal Slug 3 - Steel Beasts 6Beets.ogg -- Metal Slug 3
 clockTick.ogg -- https://freesound.org/people/straget/sounds/405423/
 

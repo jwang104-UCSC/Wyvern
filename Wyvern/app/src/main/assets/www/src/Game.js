@@ -34,7 +34,7 @@ var Game =
 		sprite.inputEnabled = true; 
 		sprite.input.enableDrag(true);
 		game.physics.enable(sprite, Phaser.Physics.ARCADE);
-		sprite.body.collideWorldBounds = true;
+		//sprite.body.collideWorldBounds = true;
 		
 		//make explosions
 	    explosions = game.add.group();
@@ -64,6 +64,7 @@ var Game =
 		}
 	    if (!timepaused) background.tilePosition.y += 2;
 		if (game.time.now > spawnTime && gameStart == true) this.makeEnemy();
+		if (fightingBoss && game.time.now > bossAttackTime) this.bossAttack();
 		this.fireBullet();
 
 		//Updates the UI counters
@@ -73,6 +74,7 @@ var Game =
 
 	    //Collision tests
 	    game.physics.arcade.collide(meteors);
+	    game.physics.arcade.overlap(hitbox, bossLasers, this.laserHit);
 	    game.physics.arcade.overlap(hitbox, boss, this.bossTouched);
 	    game.physics.arcade.overlap(bullets, boss, this.bossHit);
 	    game.physics.arcade.overlap(bigboom, boss, this.bossBombed);
@@ -131,7 +133,7 @@ var Game =
 		spawnDelay = levelSettings["spawnDelay"];
 		spawnTime = 0;
 		bulletTime = 0;
-		firingTime = 0;
+		bossAttackTime = 0;
 		hurtTime = 0;
 		shieldDuration = 2000; // 2 seconds
 		canShoot = true;
@@ -167,10 +169,14 @@ var Game =
 		warudoEnd   = game.add.audio('warudoEndSFX', 1);
 		clockTick   = game.add.audio('clockTick', 0.3, true);
 		boomb       = game.add.audio('explosionSFX', 0.2);
+		fanfare		= game.add.audio('fanfare', 0.3);
 
 		playerHurt  = game.add.audio('hurt', 0.15);
+		lifeUp  	= game.add.audio('1up', 0.7);
 
 		bossDeath 	= game.add.audio('bossDeath', 0.25);
+		bossCharge 	= game.add.audio('laserCharge', 0.4);
+		bossShoot 	= game.add.audio('laserShot', 0.2);
 
 		eyeHit      = game.add.audio('eyehit', 0.1);
 		eyeDeath    = game.add.audio('eyedeath', 0.1);
@@ -182,7 +188,7 @@ var Game =
 		shieldTouch = game.add.audio('shieldTouch', 0.1);
 		shieldDown  = game.add.audio('shieldDown', 0.15);
 		
-		sfxGroup = {boomb, eyeHit, eyeDeath, rockHit, 
+		sfxGroup = {boomb, eyeHit, eyeDeath, rockHit, bossShoot,bossCharge,
 			rockDeath, shieldUp, shieldTouch, shieldDown, playerHurt};
 
 		for(var i = 0; i < sfxGroup.length; i++)
@@ -223,7 +229,7 @@ var Game =
 	    //shooting toggle AKA debug button make it do whatever you want for testing
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
 	    //function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
-	    //function(){bossDeath.play();});
+	    //function(){fanfare.play();});
 	    function(){that.startBossFight()});
 
 	    shootToggle.scale.setTo(0.8, 0.8);
@@ -551,6 +557,19 @@ var Game =
 	        e.worth = 50;
 	    }
 
+		bossLasers = game.add.group();
+	    bossLasers.enableBody = true;
+
+	    for (var i = 0; i < 10; i++)
+	    { 
+	        var b = bossLasers.create(0, 0, 'bullet');
+	        b.name = 'bossLaser' + i;
+	        b.anchor.setTo(0.5,0);
+	        b.exists = false;
+	        b.visible = false;
+	        b.tangible = false;
+	    }
+
 	    boss = game.add.sprite(0, 0, 'dorito');
 	    boss.name = "why";
 	    boss.anchor.setTo(0.5);
@@ -573,6 +592,8 @@ var Game =
 	    bossHPBarBack.scale.setTo(1,0.5);
 	    bossHPBarBack.anchor.setTo(0)
 	    bossHPBarBack.width = 0;
+
+	 	
 	},
 
 	fireBullet: function() 
@@ -614,6 +635,18 @@ var Game =
 		score++;
 		lifeUpCounter ++;
 		that.bossHurt(2);
+		var bossX = boss.body.x+15;
+		var bossY = boss.body.y+15;
+
+		//RNG to check if an item drops
+	    if (Math.random() < dropRate/2)
+	    {	
+	    	explodeFunct(bossX, bossY);
+	    	//If pass the check twice, drop the rarer timestop power
+	    	if (Math.random() < 5*dropRate) 
+	    		that.makeDrops(bossX, bossY, 2); //timestop doesn't really work with boss yet
+	    	else that.makeDrops(bossX, bossY);
+	    } 	
 	},
 	//Handles bullet collision
 	bulletHit: function(shot, victim) 
@@ -670,6 +703,7 @@ var Game =
 		    if(lifeUpCounter > 5000)
 		    {
 		    	this.livesUp();
+		    	lifeUp.play();
 		    	lifeUpCounter = 0;
 		    }
 
@@ -817,19 +851,28 @@ var Game =
 
 	bossTouched: function(player, boss) 
 	{
-    	if(invulnerable)
+    	if (fightingBoss)
     	{
-    		if(game.time.now > bossHurtTime)
-    		{
-				that.bossHurt(2.5);
-				shieldTouch.play();
-				bossHurtTime = game.time.now + 200;
-    		}
-			return;
+    		if(invulnerable)
+	    	{
+	    		if(game.time.now > bossHurtTime)
+	    		{
+					that.bossHurt(2.5);
+					shieldTouch.play();
+					bossHurtTime = game.time.now + 200;
+	    		}
+				return;
+	    	}
+	    	if(!timepaused){
+	    		that.killFunct();
+	    	}
     	}
-    	if(!timepaused && fightingBoss){
+    	
+    },
+    laserHit: function(player, laser)
+    {
+    	if(!invulnerable && !timepaused && laser.tangible )
     		that.killFunct();
-    	}
     },
 
     bossHurt: function(damage)
@@ -933,15 +976,73 @@ var Game =
 	    		bossHpFill.start();
 	    	});
 	    });
-	    bossHpFill.onComplete.addOnce(function(){canShoot = true; bossHPBarBack.alpha = 0;fightingBoss = true;});
-	},
+	    bossHpFill.onComplete.addOnce(function(){
+	    	var bossMoveX = boss.x;
+	    	var bossMoveY = boss.y;
+	    	canShoot = true;
+	    	bossHPBarBack.alpha = 0;
+	    	fightingBoss = true;
+	    	bossMovement = game.time.events.loop(2000, function(){
+	    		while (Math.abs(boss.x - bossMoveX) < 10)
+	    			bossMoveX = randomIntFromInterval(20, 180);
+	    		while (Math.abs(boss.y - bossMoveY) < 10)
+	    			bossMoveY = randomIntFromInterval(20, 100);
 
-	endBossFight: function()
+	    		game.add.tween(boss).to({
+	    			x: bossMoveX,
+	    			y: bossMoveY
+	    		}, 700, Phaser.Easing.Quadratic.Out, true);
+	    	});
+	    });
+	},
+	bossAttack: function()
 	{
+		console.log("what");
+		var targetX = randomIntFromInterval(20, 180);
+		var target = bossLasers.getFirstExists(false);
+			if (target)
+			{
+				target.reset(targetX, 0);
+				target.tangible = false;
+				target.height = 0;
+				target.width = 5;
+				target.alpha = 0.9;
+				target.tint = 0xff0000;
+				bossCharge.play();
+				game.add.tween(target).to({height: game.world.height}, 300, Phaser.Easing.Linear.None, true);
+			}
+		game.time.events.add(450, function()
+		{	
+			resetFunct(target);
+			bossCharge.stop();
+			bossShoot.play();
+			var laser = bossLasers.getFirstExists(false);
+	            if (laser)
+	            {
+	            	laser.reset(targetX, 0);
+	            	laser.tangible = true;
+	            	laser.height = game.world.height;
+	            	laser.width = 20;
+	            	laser.alpha = 0.9;
+	            	target.tint = 0xffffff;
+	            	game.time.events.add(800, function(){
+	            		game.add.tween(laser).to({width: 5, alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+	            		game.time.events.add(480, function(){resetFunct(laser)});
+	            	});
+	            }
+	    });
+		bossAttackTime = game.time.now + 1600;
+	},
+	endBossFight: function()
+	{	
+		if(!fightingBoss) return;
+		fanfare.play();
 		canShoot = false;
 		fightingBoss = false;
+		bossHurtTime = 9999999;
 		bullets.killAll();
 		bossBGM.fadeOut(500);
+		game.time.events.remove(bossMovement);
 		function bossDies(){
 			bossHPBar.alpha = 0;
 			game.add.tween(boss).to({tint:0x808080}, 1300, Phaser.Easing.Linear.None, true);
@@ -975,7 +1076,7 @@ var Game =
 
 	    //END THE GAME AND PAUSE
 	    game.time.events.loop(750, function(){
-	    	if(!removing.getFirstExists() && sprite.body.y == 0)
+	    	if(!removing.getFirstExists() && sprite.y == 0)
 	    	{
 	    		tempCredits = parseInt(Cookies.get("credits"));
 	    		if (isNaN(tempCredits)) tempCredits = 0;

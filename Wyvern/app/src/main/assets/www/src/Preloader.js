@@ -50,8 +50,14 @@ var Preloader = {
 		game.load.audio('shieldUp', 'sfx/091 charge up.wav');
 		game.load.audio('shieldTouch', 'sfx/125 ping.wav');
 		game.load.audio('shieldDown', 'sfx/092 discharge.wav');
+		game.load.audio('laserCharge', 'sfx/2a2e charge up.wav');
+		game.load.audio('laserShot', 'sfx/205 discharge.wav');
+		
 		game.load.audio('hurt', 'sfx/884 hurt.wav');
+		game.load.audio('fanfare', 'sfx/705 fanfare.wav');
+		game.load.audio('1up', 'sfx/1-up.mp3');
 		game.load.audio('bossDeath', 'sfx/sndMeltingUltraA.ogg');
+		
 		
 
 		game.load.audio('explosionSFX', 'sfx/063 explode.wav');
