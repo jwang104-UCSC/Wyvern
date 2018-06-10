@@ -7,7 +7,7 @@ var Preloader = {
 
 		game.load.image('mainMenu-bg', 'img/mainMenu-bg.png')
 		game.load.image('screen-bg', 'img/screen-bg.png');
-		game.load.image('shop-bg', 'img/shop-bg.jpg');
+		game.load.image('settings-bg', 'img/shop-bg.jpg');
 		//game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
 		game.load.image('redsky', 'img/redskyloop.png');
 		game.load.image('pauseScreen', 'img/pause-screen.png');
@@ -73,7 +73,7 @@ var Preloader = {
 	create: function()
 	{
 		game.add.plugin(PhaserInput.Plugin);
-		//game.state.start("Shop");
-		game.state.start("Hub");
+		game.state.start("Shop");
+		//game.state.start("Hub");
 	}
 }

@@ -1164,10 +1164,10 @@ var Game =
 			resumeButton  = createButton("Resume", 10, game.world.width*0.5, game.world.height*0.6,
 							 100, 30, that.pauseMenu);
 			restartButton = createButton("Restart", 10, game.world.width*0.5, game.world.height*0.7,
-							 100, 30, function(){game.sound.stopAll(); game.paused = false; runTimerPaused += game.time.pauseDuration; 
+							 100, 30, function(){bgm.stop(); game.paused = false; runTimerPaused += game.time.pauseDuration; 
 							 	game.state.restart();});
 			titleButton   = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.8, 
-							160, 30, function(){game.sound.stopAll(); game.state.start('MainMenu'); game.paused = false;});
+							160, 30, function(){bgm.stop(); game.state.start('MainMenu'); game.paused = false;});
 		}
 	},
 

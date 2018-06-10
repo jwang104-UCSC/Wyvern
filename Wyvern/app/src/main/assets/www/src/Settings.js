@@ -3,7 +3,7 @@ var Settings =
 	create: function() 
 	{	
 		that = this;
-		game.add.sprite(0, 0, 'screen-bg');
+		game.add.sprite(-375, 0, 'settings-bg');
 
 		var txt = game.add.bitmapText(game.world.width*0.5, game.world.height*0.1, 'titleFont', "SETTINGS", 40);
 		txt.tint = 0xFFFFF;

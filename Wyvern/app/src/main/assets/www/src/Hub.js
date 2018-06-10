@@ -19,7 +19,7 @@ var Hub =
 	    	"spawnDelay": 200,
 	    	"enemyToughness": 2,
 	    	"score": 0,
-	    	"lives": 3,
+	    	"lives": 5,
 	    	"objective": "Reach 5000 score!"
 		};
 		//loads into game for faster testing
@@ -33,7 +33,7 @@ var Hub =
 	    	"spawnDelay": 150,
 	    	"enemyToughness": 1,
 	    	"score": 0,
-	    	"lives": 3,
+	    	"lives": 5,
 	    	"objective": "\nSurvive for\n\n30 seconds!"
 	    };
 	    //placeholder, good luck lol
@@ -46,7 +46,7 @@ var Hub =
 	    	"spawnDelay": 20,
 	    	"enemyToughness": 0,
 	    	"score": 0,
-	    	"lives": 3,
+	    	"lives": 5,
 	    	"objective": "Defeat the boss"
 	    };
 		Level1 = createButton("Level 1", 10, game.world.width*0.4, game.world.height*0.4, 
