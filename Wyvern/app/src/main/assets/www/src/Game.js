@@ -783,13 +783,13 @@ var Game =
 
 	enemyBombed: function(boom, enemy) 
 	{
-    	that.victimDies(enemy, 50);
+    	if(!timepaused)that.victimDies(enemy, 50);
     },
 
     bossBombed: function(boom, boss)
     {
     	//due to how collision works this actually hurts ~50 times
-    	that.bossHurt(0.5);
+    	if(!timepaused)that.bossHurt(0.5);
 
     },
 
@@ -839,7 +839,7 @@ var Game =
 	    game.time.events.add(30, function(){boss.tint = 0xFFFFFF});
     	bossHpPercent = boss.hp/bossMaxHP;
     	if(!timepaused)game.add.tween(bossHPBar).to({width:game.world.width*bossHpPercent}, 500, Phaser.Easing.Quadratic.InOut, true);
-    	if(boss.hp <= 0) that.endBossFight();
+    	if(!timepaused && boss.hp <= 0) that.endBossFight();
     },
 	killFunct: function()
 	{
@@ -942,22 +942,26 @@ var Game =
 		fightingBoss = false;
 		bullets.killAll();
 		bossBGM.fadeOut(500);
-		bossHPBar.alpha = 0;
-		game.add.tween(boss).to({tint:0x808080}, 1300, Phaser.Easing.Linear.None, true);
-		for(var i = 0; i < 10; i++)
-			{
-	    		game.time.events.add(130*i, function(){
-	    			bossDeath.play();
-	    			explodeFunct(boss.body.x+0.6*boss.width*Math.random(), boss.body.y+0.5*boss.height*Math.random());
-	    		});
-	    	}
-	    game.time.events.add(2000, function(){
-	    	textPop("10000", boss.body.x+10, boss.body.y+20);
-			score += 10000;
-	    	game.add.tween(boss).to({y:game.world.height+50}, 3500, Phaser.Easing.Linear.None, true);
-	    	that.endLevel();
-	    	endCondition = 1;
-	    	});
+		function bossDies(){
+			bossHPBar.alpha = 0;
+			game.add.tween(boss).to({tint:0x808080}, 1300, Phaser.Easing.Linear.None, true);
+			for(var i = 0; i < 10; i++)
+				{
+		    		game.time.events.add(130*i, function(){
+		    			bossDeath.play();
+		    			explodeFunct(boss.body.x+0.6*boss.width*Math.random(), boss.body.y+0.5*boss.height*Math.random());
+		    		});
+		    	}
+		    game.time.events.add(2000, function(){
+		    	textPop("10000", boss.body.x+10, boss.body.y+20);
+				score += 10000;
+		    	game.add.tween(boss).to({y:game.world.height+50}, 3500, Phaser.Easing.Linear.None, true);
+		    	that.endLevel();
+		    	endCondition = 1;
+		    	});
+		}
+		game.time.events.add(600, function(){bossDies()}, this);
+		
 	},
 
 	endLevel: function()
