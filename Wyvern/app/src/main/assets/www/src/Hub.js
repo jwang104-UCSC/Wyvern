@@ -22,6 +22,8 @@ var Hub =
 	    	"lives": 3,
 	    	"objective": "Reach 5000 score!"
 		};
+		//loads into game for faster testing
+		game.state.start("Game");
 	    lv2 = {
 	    	"level": 2,
 	    	"bgm": "gunsBGM",

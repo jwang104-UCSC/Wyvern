@@ -56,7 +56,7 @@ var Game =
 	},
 
 	update: function() 
-	{
+	{	
 		if (score >= 5000 && endCondition == 0)
 		{
 			this.endLevel();
@@ -73,6 +73,9 @@ var Game =
 
 	    //Collision tests
 	    game.physics.arcade.collide(meteors);
+	    game.physics.arcade.overlap(hitbox, boss, this.bossTouched);
+	    game.physics.arcade.overlap(bullets, boss, this.bossHit);
+	    game.physics.arcade.overlap(bigboom, boss, this.bossBombed);
 		game.physics.arcade.overlap(hitbox, drops, this.itemPickup);
 	    game.physics.arcade.overlap(screenEdge, meteors, this.enemyOffScreen);
 	    game.physics.arcade.overlap(bullets, meteors, this.bulletHit);
@@ -88,7 +91,7 @@ var Game =
 
 	render: function() 
 	{
-		game.debug.text(game.time.fps || '--', 2, 14, "#00ff00"); 
+		if(showFPS)game.debug.text(game.time.fps || '--', 2, 14, "#00ff00"); 
 	},
 
 	seedAndSettings: function()
@@ -101,6 +104,7 @@ var Game =
 		game.time.advancedTiming = true;
 		that = this;
 		verbose = false;
+		showFPS=false;
 
 		if (typeof levelSettings == "undefined")
 		{
@@ -134,6 +138,7 @@ var Game =
 		timepaused = false;
 		invulnerable = false;
 		levelEnding = false;
+		fightingBoss = false;
 
 		enemyToughness = levelSettings["enemyToughness"];
 		score = levelSettings["score"];
@@ -157,12 +162,15 @@ var Game =
 	{
 		//background music & sound effects
 		bgm         = game.add.audio(levelSettings["bgm"], 0.2, true);
+		bossBGM		= game.add.audio('bossBGM', 0.2, true);
 		warudo      = game.add.audio('warudoSFX', 0.7);
 		warudoEnd   = game.add.audio('warudoEndSFX', 1);
 		clockTick   = game.add.audio('clockTick', 0.3, true);
 		boomb       = game.add.audio('explosionSFX', 0.2);
 
 		playerHurt  = game.add.audio('hurt', 0.15);
+
+		bossDeath 	= game.add.audio('bossDeath', 0.25);
 
 		eyeHit      = game.add.audio('eyehit', 0.1);
 		eyeDeath    = game.add.audio('eyedeath', 0.1);
@@ -215,7 +223,9 @@ var Game =
 	    //shooting toggle AKA debug button make it do whatever you want for testing
 	    shootToggle = game.add.button(game.world.width - 50, 5, 'pauseBtn', 
 	    //function(){canShoot = !canShoot; console.log("canShoot = "+ canShoot)});
-	    function(){that.endLevel()});
+	    //function(){bossDeath.play();});
+	    function(){that.startBossFight()});
+
 	    shootToggle.scale.setTo(0.8, 0.8);
 	    shootToggle.tint = 0xff0000;
 	},
@@ -286,6 +296,7 @@ var Game =
 			game.time.events.add(1250, unpause, this);
 			function unpause(){
 				bgm.resume();
+				bossBGM.resume();
 				timepaused = false;
 				uiFadeIn(runTimer);
 				uiFadeIn(lifeIcon);
@@ -303,9 +314,14 @@ var Game =
 		    		if(!drops.warudo){
 			            drops.body.velocity.y = 100;
 			        }
-		    	});7
+		    	});
 		    	canShoot = true;
 				bullets.forEachExists(function(bullets){bullets.body.velocity.y = baseShotSpeed * shotSpeedMultiplier;});
+				if(fightingBoss)
+				{
+					game.add.tween(bossHPBar).to({width:game.world.width*bossHpPercent}, 500, Phaser.Easing.Quadratic.InOut, true);
+					if (boss.hp <= 0) that.endBossFight();
+				}
 				spawnTime = game.time.now+3000;
 				eyeHit.allowMultiple = true;
 				eyeDeath.allowMultiple = true;
@@ -321,6 +337,7 @@ var Game =
 			uiFadeOut(lifeCounter);
 			uiFadeOut(scoreText);
 			bgm.pause();
+			bossBGM.pause();
 			warudo.play();
 			var ring = bigboom.getFirstExists(false);
 			ring.scale.setTo(0.2);
@@ -532,7 +549,30 @@ var Game =
 	        e.exists = e.visible = false;
 	        e.hp = enemyToughness + 1;
 	        e.worth = 50;
-	    }	
+	    }
+
+	    boss = game.add.sprite(0, 0, 'dorito');
+	    boss.name = "why";
+	    boss.anchor.setTo(0.5);
+	    boss.exists = false;
+	    boss.visible = false;
+	    boss.scale.setTo(0.6,0.6);
+	    bossMaxHP = 200;
+	    boss.hp = bossMaxHP;
+	    bossHurtTime = 0;
+	    bossHpPercent = boss.hp/bossMaxHP;
+	    game.physics.enable(boss, Phaser.Physics.ARCADE);
+
+	    bossHPBarBack = game.add.sprite(0, game.world.height-5, "bullet");
+	    bossHPBar = game.add.sprite(0, game.world.height-5, "bullet");
+	    bossHPBar.scale.setTo(1,0.5);
+	    bossHPBar.anchor.setTo(0)
+	    bossHPBar.width = 0;
+	    bossHPBar.tint = 0xFF0000
+
+	    bossHPBarBack.scale.setTo(1,0.5);
+	    bossHPBarBack.anchor.setTo(0)
+	    bossHPBarBack.width = 0;
 	},
 
 	fireBullet: function() 
@@ -567,7 +607,14 @@ var Game =
         	bulletTime = game.time.now + shootDelay;
         }
 	},
-
+	//Boss for some reason doesn't like bulletHit() and refuses to work properly
+	bossHit: function(boss, shot)
+	{
+		resetFunct(shot);
+		score++;
+		lifeUpCounter ++;
+		that.bossHurt(2);
+	},
 	//Handles bullet collision
 	bulletHit: function(shot, victim) 
 	{
@@ -597,7 +644,7 @@ var Game =
 		     if (Math.random() < dropRate)
 		     {
 		     	//If pass the check twice, drop the rarer timestop power
-		     	if (Math.random() < dropRate) that.makeDrops(victim.body.x, victim.body.y, 2);
+		     	if (Math.random() < 5*dropRate) that.makeDrops(victim.body.x, victim.body.y, 2);
 		     	else that.makeDrops(victim.body.x, victim.body.y);
 		     } 	 	
 		}
@@ -736,7 +783,14 @@ var Game =
 
 	enemyBombed: function(boom, enemy) 
 	{
-    	if (!timepaused)that.victimDies(enemy, 50);
+    	that.victimDies(enemy, 50);
+    },
+
+    bossBombed: function(boom, boss)
+    {
+    	//due to how collision works this actually hurts ~50 times
+    	that.bossHurt(0.5);
+
     },
 
 	enemyReset: function(enemy){
@@ -761,6 +815,32 @@ var Game =
     	}
     },
 
+	bossTouched: function(player, boss) 
+	{
+    	if(invulnerable)
+    	{
+    		if(game.time.now > bossHurtTime)
+    		{
+				that.bossHurt(2.5);
+				shieldTouch.play();
+				bossHurtTime = game.time.now + 200;
+    		}
+			return;
+    	}
+    	if(!timepaused && fightingBoss){
+    		that.killFunct();
+    	}
+    },
+
+    bossHurt: function(damage)
+    {	
+    	boss.hp -= damage;
+	    boss.tint = 0xFF0000;
+	    game.time.events.add(30, function(){boss.tint = 0xFFFFFF});
+    	bossHpPercent = boss.hp/bossMaxHP;
+    	if(!timepaused)game.add.tween(bossHPBar).to({width:game.world.width*bossHpPercent}, 500, Phaser.Easing.Quadratic.InOut, true);
+    	if(boss.hp <= 0) that.endBossFight();
+    },
 	killFunct: function()
 	{
 		if(game.time.now > hurtTime)
@@ -797,7 +877,7 @@ var Game =
 	},
 
 	destroyEverything: function(){
-		game.sound.stopAll(); 
+		bgm.fadeOut(800);
 		bullets.killAll();
 		drops.killAll();
 		enemyDespawnCounter = 0;
@@ -824,6 +904,61 @@ var Game =
     	game.time.events.add(1300, function(){
     		game.add.tween(sprite).to({y: 0, alpha: 0}, 1200, Phaser.Easing.Quadratic.In, true);}, this);
 	},
+	startBossFight: function()
+	{	
+		bossBGM.stop();
+		canShoot = false;
+		spawnTime += 9999999;
+		this.destroyEverything();
+		bossHPBar.width = 0;
+		bossHPBarBack.width = 0;
+		bossHPBarBack.alpha = 1;
+		
+		boss.hp = bossMaxHP;
+		var bossDescent = game.add.tween(boss).to({ y:game.world.height*0.2}, 2000, Phaser.Easing.Quadratic.Out, false);
+		var bossHpFill = game.add.tween(bossHPBar).to({width:game.world.width}, 2000, Phaser.Easing.Linear.None, false);
+		var bossHpBackFill = game.add.tween(bossHPBarBack).to({width:game.world.width}, 2000, Phaser.Easing.Linear.None, false);
+		var bossStart = game.time.events.loop(500, function(){
+	    	if(!removing.getFirstExists())
+	    	{
+				boss.reset(game.world.centerX, -boss.height);
+				game.time.events.remove(bossStart);
+		    	bossDescent.start();
+		    	bossBGM.play();
+		    }
+		});
+	    bossDescent.onComplete.addOnce(function(){
+	    	bossHpBackFill.start();
+	    	game.time.events.add(400, function(){
+	    		bossHpFill.start();
+	    	});
+	    });
+	    bossHpFill.onComplete.addOnce(function(){canShoot = true; bossHPBarBack.alpha = 0;fightingBoss = true;});
+	},
+
+	endBossFight: function()
+	{
+		canShoot = false;
+		fightingBoss = false;
+		bullets.killAll();
+		bossBGM.fadeOut(500);
+		bossHPBar.alpha = 0;
+		game.add.tween(boss).to({tint:0x808080}, 1300, Phaser.Easing.Linear.None, true);
+		for(var i = 0; i < 10; i++)
+			{
+	    		game.time.events.add(130*i, function(){
+	    			bossDeath.play();
+	    			explodeFunct(boss.body.x+0.6*boss.width*Math.random(), boss.body.y+0.5*boss.height*Math.random());
+	    		});
+	    	}
+	    game.time.events.add(2000, function(){
+	    	textPop("10000", boss.body.x+10, boss.body.y+20);
+			score += 10000;
+	    	game.add.tween(boss).to({y:game.world.height+50}, 3500, Phaser.Easing.Linear.None, true);
+	    	that.endLevel();
+	    	endCondition = 1;
+	    	});
+	},
 
 	endLevel: function()
 	{
@@ -836,7 +971,7 @@ var Game =
 
 	    //END THE GAME AND PAUSE
 	    game.time.events.loop(750, function(){
-	    	if(!removing.getFirstExists() && sprite.alpha == 0)
+	    	if(!removing.getFirstExists() && sprite.body.y == 0)
 	    	{
 	    		tempCredits = parseInt(Cookies.get("credits"));
 	    		if (isNaN(tempCredits)) tempCredits = 0;
@@ -855,6 +990,7 @@ var Game =
 									140, 30, function(){
 										game.paused = false;
 										runTimerPaused +=game.time.pauseDuration;
+										game.sound.stopAll();
 								    	that.setLevelSettings();
 										game.state.start('Game')
 									});
@@ -899,13 +1035,12 @@ var Game =
 		endScore.anchor.setTo(0.5);
 		highscoreText.anchor.setTo(0.5);
 
-		bgm.stop();
+		game.sound.stopAll();
 		retryButton = createButton("Retry", 10, game.world.width*0.5, game.world.height*0.7,
 						 100, 30, function(){game.paused = false; runTimerPaused += game.time.pauseDuration; game.state.restart();})
 		returnButton = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.9, 
-								160, 30, function(){game.state.start('MainMenu'); game.paused = false; bgm.stop();});
+								160, 30, function(){game.state.start('MainMenu'); game.paused = false;});
 	},
-
 	//Pause menu setup
 	pauseMenu: function()
 	{
@@ -923,10 +1058,10 @@ var Game =
 			resumeButton  = createButton("Resume", 10, game.world.width*0.5, game.world.height*0.6,
 							 100, 30, that.pauseMenu);
 			restartButton = createButton("Restart", 10, game.world.width*0.5, game.world.height*0.7,
-							 100, 30, function(){bgm.stop(); game.paused = false; runTimerPaused += game.time.pauseDuration; 
+							 100, 30, function(){game.sound.stopAll(); game.paused = false; runTimerPaused += game.time.pauseDuration; 
 							 	game.state.restart();});
 			titleButton   = createButton("Title Screen", 10, game.world.width*0.5, game.world.height*0.8, 
-							160, 30, function(){bgm.stop(); game.state.start('MainMenu'); game.paused = false;});
+							160, 30, function(){game.sound.stopAll(); game.state.start('MainMenu'); game.paused = false;});
 		}
 	},
 

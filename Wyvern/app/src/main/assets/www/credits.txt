@@ -1,0 +1,15 @@
+sfx/
+###*.wav -- Nuclear Throne
+sndMeltingUltraA.ogg -- Nuclear Throne
+Za Warudo.mp3, Warudo End.ogg -- JoJo's Bizarre Adventure: Stardust Crusaders
+Metal Slug 3 - Into the Cosmos.ogg, Metal Slug 3 - Steel Beasts 6Beets.ogg -- Metal Slug 3
+clockTick.ogg -- https://freesound.org/people/straget/sounds/405423/
+
+img/
+explode.png, flixel-button.png -- Phaser examples
+bomb36x36.png -- http://starfox.wikia.com/wiki/Smart_Bomb
+watch36x36.png -- https://bindingofisaacrebirth.gamepedia.com/Stop_Watch
+eyes35x32.png -- https://www.spriters-resource.com/neo_geo_ngcd/ms3/sheet/46370/
+meteorite-fixed.png -- https://www.spriters-resource.com/neo_geo_ngcd/ms3/sheet/46508/
+letters-fix.png, numbers.png -- https://www.spriters-resource.com/neo_geo_ngcd/ms3/sheet/29721/
+invuln2.png, redring.png, shield36x36-2.png  -- jwang104

@@ -8,7 +8,7 @@ var Preloader = {
 		game.load.image('mainMenu-bg', 'img/mainMenu-bg.png')
 		game.load.image('screen-bg', 'img/screen-bg.png');
 		game.load.image('shop-bg', 'img/shop-bg.jpg');
-		game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
+		//game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
 		game.load.image('redsky', 'img/redskyloop.png');
 		game.load.image('pauseScreen', 'img/pause-screen.png');
 
@@ -36,8 +36,10 @@ var Preloader = {
 
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
 		game.load.audio('cosmosBGM', 'sfx/Metal Slug 3 - Into the Cosmos.ogg');
+		game.load.audio('bossBGM', 'sfx/Metal Slug 3 - Steel Beasts 6Beets.ogg');
 		//placeholder lv.2 bgm
 		game.load.audio('gunsBGM', 'sfx/mus107.ogg');
+		
 		game.load.audio('warudoSFX', 'sfx/Za Warudo.mp3');
 		game.load.audio('warudoEndSFX', 'sfx/Warudo End.ogg');
 		game.load.audio('clockTick', 'sfx/clockTick.ogg');
@@ -49,7 +51,7 @@ var Preloader = {
 		game.load.audio('shieldTouch', 'sfx/125 ping.wav');
 		game.load.audio('shieldDown', 'sfx/092 discharge.wav');
 		game.load.audio('hurt', 'sfx/884 hurt.wav');
-		
+		game.load.audio('bossDeath', 'sfx/sndMeltingUltraA.ogg');
 		
 
 		game.load.audio('explosionSFX', 'sfx/063 explode.wav');
@@ -63,9 +65,7 @@ var Preloader = {
 	create: function()
 	{
 		game.add.plugin(PhaserInput.Plugin);
-		//loads right into the game because I'm tired of clicking the menu away
-		//game.state.start("Game");
-		game.state.start("Shop");
-		//game.state.start("Hub");
+		//game.state.start("Shop");
+		game.state.start("Hub");
 	}
 }
