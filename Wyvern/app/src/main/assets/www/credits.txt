@@ -2,9 +2,9 @@ sfx/
 2a2e charge up.wav -- Undertale
 ###*.wav -- Nuclear Throne
 sndMeltingUltraA.ogg -- Nuclear Throne
+sword.mp3 -- Phaser assets
 Za Warudo.mp3, Warudo End.ogg -- JoJo's Bizarre Adventure: Stardust Crusaders
 1-up.mp3 -- Metal Slug 3
-Metal Slug 3 - Into the Cosmos.ogg, Metal Slug 3 - Steel Beasts 6Beets.ogg -- Metal Slug 3
 clockTick.ogg -- https://freesound.org/people/straget/sounds/405423/
 Elysium, in the Blue Sky.mp3 -- Xenoblade Chronicles 2
 Song of the Ancients - Atonement.wav -- NieR Automata OST
@@ -12,10 +12,16 @@ Evil Flight.mp3 -- Bravely Default OST
 Snake of the Snake.mp3 -- Bravely Default OST
 
 img/
-explode.png, flixel-button.png -- Phaser examples
+cougar_dragonsun.png, mainMenu-bg.png -- http://amiga.lychesis.net/scene/Cougar/Cougar_DragonSun.html
+dragon.png -- https://www.pinterest.com/pin/532902568400744387/
+shop-bg.jpg -- https://static.zerochan.net/Natsu.Dragneel.full.408629.jpg
+explode.png, flixel-button.png, desyrel.png, carrier_command.png, shortStack.png -- Phaser assets
 bomb36x36.png -- http://starfox.wikia.com/wiki/Smart_Bomb
 watch36x36.png -- https://bindingofisaacrebirth.gamepedia.com/Stop_Watch
 eyes35x32.png -- https://www.spriters-resource.com/neo_geo_ngcd/ms3/sheet/46370/
 meteorite-fixed.png -- https://www.spriters-resource.com/neo_geo_ngcd/ms3/sheet/46508/
 letters-fix.png, numbers.png -- https://www.spriters-resource.com/neo_geo_ngcd/ms3/sheet/29721/
+redskyloop.png -- https://ak8.picdn.net/shutterstock/videos/7838872/thumb/1.jpg, edited by jwang104
+starryskyloop.png -- Phaser assets, edited by jwang104
 invuln2.png, redring.png, shield36x36-2.png  -- jwang104
+

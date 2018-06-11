@@ -45,21 +45,7 @@ var Game =
 
 	update: function() 
 	{	
-		if (score >= 5000 && endCondition == 0 && levelSettings['level'] == 1)
-		{
-			this.endLevel();
-			endCondition++;
-		}
-		else if (timeDifference >= 60000 && endCondition == 0 && levelSettings['level'] == 2)
-		{
-			this.endLevel();
-			endCondition++;
-		}
-		else if (score >= 10000 && endCondition == 0 && levelSettings['level'] == 3)
-		{
-			this.startBossFight();
-			endCondition++;
-		}
+		this.checkLevelEnd();
 	    if (!timepaused) background.tilePosition.y += 2;
 		if (game.time.now > spawnTime && gameStart == true) this.makeEnemy();
 		if (fightingBoss && game.time.now > bossAttackTime) this.bossAttack();
@@ -93,7 +79,24 @@ var Game =
 	{
 		if(showFPS)game.debug.text(game.time.fps || '--', 2, 14, "#00ff00"); 
 	},
-
+	checkLevelEnd: function()
+	{
+		if (score >= 5000 && endCondition == 0 && levelSettings['level'] == 1)
+		{
+			this.endLevel();
+			endCondition++;
+		}
+		else if (timeDifference >= 30000 && endCondition == 0 && levelSettings['level'] == 2)
+		{
+			this.endLevel();
+			endCondition++;
+		}
+		else if (score >= 10000 && endCondition == 0 && levelSettings['level'] == 3)
+		{
+			this.startBossFight();
+			endCondition++;
+		}
+	},
 	seedAndSettings: function()
 	{
 		timeDifference = 0; //Defined here as a global as an accurate time tracker
@@ -163,8 +166,8 @@ var Game =
 	audioSetup: function()
 	{
 		//background music & sound effects
-		bgm         = game.add.audio(levelSettings["bgm"], 0.2, true);
-		bossBGM		= game.add.audio('bossBGM', 0.2, true);
+		bgm         = game.add.audio(levelSettings["bgm"], 0.15, true);
+		bossBGM		= game.add.audio('bossBGM', 0.15, true);
 		warudo      = game.add.audio('warudoSFX', 0.7);
 		warudoEnd   = game.add.audio('warudoEndSFX', 1);
 		clockTick   = game.add.audio('clockTick', 0.3, true);
@@ -174,10 +177,14 @@ var Game =
 		playerHurt  = game.add.audio('hurt', 0.15);
 		lifeUp  	= game.add.audio('1up', 0.7);
 
+		bossHit 	= game.add.audio('bossHit1', 0.1);
+		bossHit1 	= game.add.audio('bossHit2', 0.2);
+		bossHit2 	= game.add.audio('bossHit3', 0.2);
+		bossHurt 	= game.add.audio('bossHurt', 0.2);
 		bossDying 	= game.add.audio('bossDying', 0.1);
 		bossDeath 	= game.add.audio('bossDeath', 0.25);
-		bossCharge 	= game.add.audio('laserCharge', 0.4);
-		bossShoot 	= game.add.audio('laserShot', 0.2);
+		bossCharge 	= game.add.audio('laserCharge', 0.25);
+		bossShoot 	= game.add.audio('laserShot', 0.15);
 
 		eyeHit      = game.add.audio('eyehit', 0.1);
 		eyeDeath    = game.add.audio('eyedeath', 0.1);
@@ -189,7 +196,7 @@ var Game =
 		shieldTouch = game.add.audio('shieldTouch', 0.1);
 		shieldDown  = game.add.audio('shieldDown', 0.15);
 		
-		sfxGroup = {boomb, eyeHit, eyeDeath, rockHit, bossShoot,bossCharge,
+		sfxGroup = {boomb, eyeHit, eyeDeath, rockHit, bossHurt, bossHit, bossHit1, bossHit2, bossShoot, bossCharge, 
 			rockDeath, shieldUp, shieldTouch, shieldDown, playerHurt};
 
 		for(var i = 0; i < sfxGroup.length; i++)
@@ -305,6 +312,7 @@ var Game =
 	    bossMaxHP = 200;
 	    boss.hp = bossMaxHP;
 	    bossHurtTime = 0;
+	    bossHurtSfxTime = 0;
 	    bossHpPercent = boss.hp/bossMaxHP;
 	    game.physics.enable(boss, Phaser.Physics.ARCADE);
 
@@ -401,6 +409,7 @@ var Game =
 
 	    shootToggle.scale.setTo(0.8, 0.8);
 	    shootToggle.tint = 0xff0000;
+	    shootToggle.alpha = 0;
 	},
 
 	//Controls the display at the start of the level
@@ -667,10 +676,8 @@ var Game =
 	    if (Math.random() < dropRate/2)
 	    {	
 	    	explodeFunct(bossX, bossY);
-	    	//If pass the check twice, drop the rarer timestop power
-	    	if (Math.random() < 5*dropRate) 
-	    		that.makeDrops(bossX, bossY, 2); //timestop doesn't really work with boss yet
-	    	else that.makeDrops(bossX, bossY);
+	    	bossHurt.play();
+	    	that.makeDrops(bossX, bossY);
 	    } 	
 	},
 	//Handles bullet collision
@@ -902,6 +909,18 @@ var Game =
 
     bossHurt: function(damage)
     {	
+    	if(game.time.now > bossHurtSfxTime)
+		{
+			var sound = randomIntFromInterval(0, 2);
+	    	switch (sound)
+	    	{
+	    		case 0: bossHit.play(); break;
+	    		case 1: bossHit1.play(); break;
+	    		case 2: bossHit2.play(); break;
+	    		default:  bossHit.play();
+	    	}
+	    	bossHurtSfxTime = game.time.now + 200;
+		}
     	boss.hp -= damage;
 	    boss.tint = 0xFF0000;
 	    game.time.events.add(30, function(){boss.tint = 0xFFFFFF});
@@ -1043,7 +1062,8 @@ var Game =
 				target.alpha = 0.9;
 				target.tint = 0xff0000;
 				bossCharge.play();
-				game.add.tween(target).to({height: game.world.height}, 300, Phaser.Easing.Linear.None, true);
+				var tweaen = game.add.tween(target).to({height: game.world.height}, 300, Phaser.Easing.Linear.None, true);
+				target.tweaen = tweaen;
 			}
 		game.time.events.add(450, function()
 		{	
@@ -1052,17 +1072,21 @@ var Game =
 			bossShoot.play();
 			var laser = bossLasers.getFirstExists(false);
 	            if (laser)
-	            {
+	            {	
+	            	var timer, timer2, tween
 	            	laser.reset(targetX, 0);
 	            	laser.tangible = true;
 	            	laser.height = game.world.height;
 	            	laser.width = 20;
 	            	laser.alpha = 0.9;
 	            	target.tint = 0xffffff;
-	            	game.time.events.add(800, function(){
-	            		game.add.tween(laser).to({width: 5, alpha: 0}, 500, Phaser.Easing.Linear.None, true);
-	            		game.time.events.add(480, function(){resetFunct(laser)});
+	            	var timer = game.time.events.add(800, function(){
+	            		var tween = game.add.tween(laser).to({width: 5, alpha: 0}, 500, Phaser.Easing.Linear.None, true);
+	            		var timer2 = game.time.events.add(480, function(){resetFunct(laser)});
 	            	});
+	            	laser.timer = timer;
+        			laser.timer2 = timer2;
+            		laser.tween = tween;
 	            }
 	    });
 		bossAttackTime = game.time.now + 1600;

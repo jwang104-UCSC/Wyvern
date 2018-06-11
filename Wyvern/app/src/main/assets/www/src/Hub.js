@@ -33,17 +33,16 @@ var Hub =
 	    	"enemyToughness": 1,
 	    	"score": 0,
 	    	"lives": 5,
-	    	"objective": "\nSurvive for\n\n60 seconds!"
+	    	"objective": "\nSurvive for\n\n30 seconds!"
 	    };
-	    //placeholder, good luck lol
 	    lv3 = {
 	    	"level": 3,
 	    	"bgm": "generalBGM",
-	    	"makeEnemy%": 0.7,
+	    	"makeEnemy%": 0.5,
 	    	"Enemy Type 1": "meteors",
-	    	"Enemy Type 2": "meteors",
-	    	"spawnDelay": 50,
-	    	"enemyToughness": 0,
+	    	"Enemy Type 2": "eyes",
+	    	"spawnDelay": 100,
+	    	"enemyToughness": 1,
 	    	"score": 0,
 	    	"lives": 5,
 	    	"objective": "Reach 10000 score!"

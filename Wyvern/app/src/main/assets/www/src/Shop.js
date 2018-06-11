@@ -35,7 +35,8 @@ var Shop =
 		shopText.anchor.setTo(0.5, 0.5);
 
 		//Add in general sprites
-		game.add.sprite(game.world.width*0.7, game.world.height*0.45, 'shield');
+		invuln = game.add.sprite(game.world.width*0.665, game.world.height*0.44, 'invuln');
+		invuln.scale.setTo(0.3);
 		bullet1 = game.add.sprite(game.world.width*0.775, game.world.height*0.7, 'fireball');
 		wyvern  = game.add.sprite(game.world.width*0.665, game.world.height*0.25, 'dragon');
 		bullet1.scale.setTo(0.01);

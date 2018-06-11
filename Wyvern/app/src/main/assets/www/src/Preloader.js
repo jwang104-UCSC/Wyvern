@@ -8,7 +8,6 @@ var Preloader = {
 		game.load.image('mainMenu-bg', 'img/mainMenu-bg.png')
 		game.load.image('screen-bg', 'img/screen-bg.png');
 		game.load.image('settings-bg', 'img/shop-bg.jpg');
-		//game.load.image('screen-howtoplay', 'img/screen-howtoplay.png');
 		game.load.image('redsky', 'img/redskyloop.png');
 		game.load.image('pauseScreen', 'img/pause-screen.png');
 
@@ -37,9 +36,6 @@ var Preloader = {
 		game.load.audio('buttonSFX', 'sfx/sword.mp3');
 		game.load.audio('generalBGM', 'sfx/Evil Flight.mp3');
 		game.load.audio('bossBGM', 'sfx/Snack of the Snake.mp3');
-
-		//placeholder lv.2 bgm
-		game.load.audio('gunsBGM', 'sfx/mus107.ogg');
 		
 		game.load.audio('warudoSFX', 'sfx/Za Warudo.mp3');
 		game.load.audio('warudoEndSFX', 'sfx/Warudo End.ogg');
@@ -53,24 +49,26 @@ var Preloader = {
 		game.load.audio('shieldDown', 'sfx/092 discharge.wav');
 		game.load.audio('laserCharge', 'sfx/2a2e charge up.wav');
 		game.load.audio('laserShot', 'sfx/205 discharge.wav');
-		game.load.audio('bossDying', 'sfx/674 death.wav');
 		
 		game.load.audio('hurt', 'sfx/884 hurt.wav');
-		game.load.audio('fanfare', 'sfx/705 fanfare.wav');
 		game.load.audio('1up', 'sfx/1-up.mp3');
+		
+		game.load.audio('fanfare', 'sfx/705 fanfare.wav');
+		game.load.audio('bossHit1', 'sfx/378 squish.wav');
+		game.load.audio('bossHit2', 'sfx/397 hurt1.wav');
+		game.load.audio('bossHit3', 'sfx/398 hurt2.wav');
+		game.load.audio('bossHurt', 'sfx/657 hurt.wav');
 		game.load.audio('bossDying', 'sfx/674 death.wav');
 		game.load.audio('bossDeath', 'sfx/sndMeltingUltraA.ogg');
 
 		game.load.audio('theme', 'sfx/Elysium, in the Blue Sky.mp3');
-		game.load.audio('level2BGM', 'sfx/Song of the Ancients - Atonement.wav');
+		game.load.audio('level2BGM', 'sfx/Song of the Ancients - Atonement.mp3');
 		
 
 		game.load.audio('explosionSFX', 'sfx/063 explode.wav');
 		
 
-		//game.load.spritesheet('eyes', 'img/metalslug_monster39x40.png', 39, 40);
 		game.load.image('pauseBtn', 'img/pause.png');
-		//game.load.spritesheet('button-start', 'img/button-start.png', 146, 51);
 		game.load.spritesheet('button', 'img/flixel-button.png', 80, 20);
 	},
 	create: function()
@@ -79,7 +77,7 @@ var Preloader = {
 		theme = game.add.audio('theme', 0.3, true);
 		theme.play();
 		game.state.start("MainMenu");
-		//game.state.start("Settings");
-		//game.state.start("Hub");
+		// game.state.start("Shop");
+		// game.state.start("Hub");
 	}
 }
